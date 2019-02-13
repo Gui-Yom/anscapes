@@ -1,0 +1,48 @@
+plugins {
+    id 'java-library'
+    id 'maven'
+}
+
+group 'com.limelion'
+version '0.1.0'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenLocal()
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'junit:junit:4.12'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = 'UTF-8'
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.allJava
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = "javadoc"
+    from javadoc.destinationDir
+}
+
+task buildPackage(type: DefaultTask) {
+    dependsOn jar
+    dependsOn sourcesJar
+    dependsOn javadocJar
+}
+
+artifacts {
+    archives javadocJar
+    archives sourcesJar
+}
+
+clean.doFirst {
+    delete "output"
+}
