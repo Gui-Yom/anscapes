@@ -1,144 +1,90 @@
 package com.limelion.anscapes;
 
+import java.awt.Color;
 import java.io.IOException;
 
 public class Anscapes {
 
-    private static final String CSI = "\033[";
-    public static final String RESET = CSI + "0m";
-    public static final String CLEAR = CSI + "H" + CSI + "2J";
+    public static final String CSI = "\033[",
+        RESET = CSI + "m",
+        CLEAR = CSI + "2J",
+        CLEAR_BUFFER = CSI + "3J",
+        RESET_CURSOR = CSI + "H",
+        CLEAR_LINE = CSI + "2K",
+        MOVE_UP = CSI + "A",
+        MOVE_DOWN = CSI + "B",
+        MOVE_RIGHT = CSI + "C",
+        MOVE_LEFT = CSI + "D",
+        MOVE_LINEUP = CSI + "E",
+        MOVE_LINEDOWN = CSI + "F";
 
-    public static void clear() {
+    public static String moveUp(int n) {
 
-        write(CLEAR);
+        return CSI + n + "A";
     }
 
-    public static void reset() {
+    public static String moveDown(int n) {
 
-        write(RESET);
+        return CSI + n + "B";
     }
 
-    public static void moveUp(int n) {
+    public static String moveRight(int n) {
 
-        write(Move.UP.n(n));
+        return CSI + n + "C";
     }
 
-    public static void moveDown(int n) {
+    public static String moveLeft(int n) {
 
-        write(Move.DOWN.n(n));
+        return CSI + n + "D";
     }
 
-    public static void moveRight(int n) {
+    public static String moveNextLine(int n) {
 
-        write(Move.RIGHT.n(n));
+        return CSI + n + "E";
     }
 
-    public static void moveLeft(int n) {
+    public static String movePreviousLine(int n) {
 
-        write(Move.LEFT.n(n));
+        return CSI + n + "F";
     }
 
-    public static void setCursorPos(int n, int m) {
+    public static String cursorPos(int n, int m) {
 
-        write(CSI + n + ";" + m + "H");
+        return CSI + n + ";" + m + "H";
     }
 
-    public static void clearLine() {
+    public static CursorPos cursorPos() {
 
-        write(CSI + "2K");
-    }
-
-    private static void write(String s) {
-
+        System.out.print(CSI + "6n");
         try {
-            System.out.write(s.getBytes());
+            System.in.read();
+            System.in.read();
+            int read = -1;
+            StringBuilder row = new StringBuilder();
+            while ((read = System.in.read()) != ';') {
+                row.append((char) read);
+            }
+            StringBuilder col = new StringBuilder();
+            while ((read = System.in.read()) != 'R') {
+                col.append((char) read);
+            }
+            return new CursorPos(row.length() > 0 ? Integer.parseInt(row.toString()) : 1,
+                                 col.length() > 0 ? Integer.parseInt(col.toString()) : 1);
         } catch (IOException e) {
             e.printStackTrace();
-        } finally {
-            System.out.flush();
         }
+        return null;
     }
 
-    public enum Colors {
+    public static class CursorPos {
 
-        FG_BLACK(30),
-        FG_RED(31),
-        FG_GREEN(32),
-        FG_YELLOW(33),
-        FG_BLUE(34),
-        FG_MAGENTA(35),
-        FG_CYAN(36),
-        FG_WHITE(37),
+        public int row;
+        public int col;
 
-        FG_BLACK_BRIGHT(FG_BLACK, 60),
-        FG_RED_BRIGHT(FG_RED, 60),
-        FG_GREEN_BRIGHT(FG_GREEN, 60),
-        FG_YELLOW_BRIGHT(FG_YELLOW, 60),
-        FG_BLUE_BRIGHT(FG_BLUE, 60),
-        FG_MAGENTA_BRIGHT(FG_MAGENTA, 60),
-        FG_CYAN_BRIGHT(FG_CYAN, 60),
-        FG_WHITE_BRIGHT(FG_WHITE, 60),
+        public CursorPos(int row, int col) {
 
-        BG_BLACK(FG_BLACK, 10),
-        BG_RED(FG_RED, 10),
-        BG_GREEN(FG_GREEN, 10),
-        BG_YELLOW(FG_YELLOW, 10),
-        BG_BLUE(FG_BLUE, 10),
-        BG_MAGENTA(FG_MAGENTA, 10),
-        BG_CYAN(FG_CYAN, 10),
-        BG_WHITE(FG_WHITE, 10),
-
-        BG_BLACK_BRIGHT(FG_BLACK_BRIGHT, 10),
-        BG_RED_BRIGHT(FG_RED_BRIGHT, 10),
-        BG_GREEN_BRIGHT(FG_GREEN_BRIGHT, 10),
-        BG_YELLOW_BRIGHT(FG_YELLOW_BRIGHT, 10),
-        BG_BLUE_BRIGHT(FG_BLUE_BRIGHT, 10),
-        BG_MAGENTA_BRIGHT(FG_MAGENTA_BRIGHT, 10),
-        BG_CYAN_BRIGHT(FG_CYAN_BRIGHT, 10),
-        BG_WHITE_BRIGHT(FG_WHITE_BRIGHT, 10);
-
-        public final int value;
-
-        Colors(int value) {
-
-            this.value = value;
-        }
-
-        Colors(Colors c, int offset) {
-
-            this.value = c.value + offset;
-        }
-
-        @Override
-        public String toString() {
-
-            return CSI + value + 'm';
+            this.row = row;
+            this.col = col;
         }
     }
-
-    public enum Move {
-
-        UP,
-        DOWN,
-        RIGHT,
-        LEFT;
-
-        public String n(int n) {
-
-            switch (this) {
-
-                case UP:
-                    return CSI + n + 'A';
-                case DOWN:
-                    return CSI + n + 'B';
-                case RIGHT:
-                    return CSI + n + 'C';
-                case LEFT:
-                    return CSI + n + 'D';
-                default:
-                    return null;
-            }
-        }
-    }
-
 }
