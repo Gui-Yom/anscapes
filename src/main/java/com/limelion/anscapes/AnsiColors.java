@@ -4,6 +4,8 @@ import java.awt.Color;
 
 public interface AnsiColors {
 
+    // TODO unify colors into one enum
+
     static String rgbFG(int r, int g, int b) {
 
         return Anscapes.CSI + "38;2;" + r + ';' + g + ';' + b + 'm';

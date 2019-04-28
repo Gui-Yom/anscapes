@@ -18,7 +18,7 @@ public class ImgConverter {
     private static final char FULL_CHAR = '\u2588',
         TOP_CHAR = '\u2580',
         BOTTOM_CHAR = '\u2584';
-
+    private static final int distanceTreshold = 5;
     // Smooth the image
     private boolean smoothing;
     // Color mode
@@ -110,6 +110,9 @@ public class ImgConverter {
             // Code for current pixel
             String currChar = null;
 
+            // TODO add more simplifications
+            // TODO add more reset options (after each line of after each char)
+
             if (mode == Mode.ANSI_COLORS) {
 
                 ColorFG topColor = findFgColor(topPixel);
@@ -135,6 +138,7 @@ public class ImgConverter {
 
                 }
 
+                // RGB mode implementation is still fucked up a bit (well, less than the ansi one)
             } else if (mode == Mode.RGB) {
 
                 String topColor = AnsiColors.rgbFG(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
@@ -145,7 +149,7 @@ public class ImgConverter {
                 if (topPixel.equals(bottomPixel)) {
 
                     if (topPixel.equals(ColorFG.FG_BLACK.color()))
-                        currChar = ColorFG.FG_BLACK.code() + ' ';
+                        currChar = ColorBG.BG_BLACK.code() + ' ';
                     else
                         currChar = topColor + FULL_CHAR;
 
@@ -159,10 +163,15 @@ public class ImgConverter {
                         currChar = topColor + bottomBgColor + TOP_CHAR;
 
                 }
+            } else {
+
+                // What else ?
+                // Cmon its not possible, enjoy Java 12
             }
 
             // Save space if last code equals current code
             if (currChar.equals(lastChar)) {
+                // Ugly af
                 converted.append(currChar.replaceAll("[\\033m;\\d\\\\\\[]", ""));
             } else {
                 converted.append(currChar);
@@ -181,13 +190,25 @@ public class ImgConverter {
         return converted.toString();
     }
 
+    /**
+     * @param bottom
+     *
+     * @return the nearest ANSI color
+     */
     private ColorBG findBgColor(Color bottom) {
 
         ColorBG closest = null;
         float closestDist = Float.MAX_VALUE;
 
         for (ColorBG color : ColorBG.values()) {
+
             float dist = rgbDistance(color.color(), bottom);
+
+            // Speedup, if low distance its a spot-on
+            if (dist < distanceTreshold) {
+                return color;
+            }
+
             if (dist < closestDist) {
                 closestDist = dist;
                 closest = color;
@@ -207,7 +228,14 @@ public class ImgConverter {
         float closestDist = Float.MAX_VALUE;
 
         for (ColorFG color : ColorFG.values()) {
+
             float dist = rgbDistance(color.color(), top);
+
+            // Speedup, if low distance its a spot-on
+            if (dist < distanceTreshold) {
+                return color;
+            }
+
             if (dist < closestDist) {
                 closestDist = dist;
                 closest = color;
