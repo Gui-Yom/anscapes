@@ -8,18 +8,20 @@ import java.io.IOException;
  */
 public class Anscapes {
 
-    public static final String CSI = "\033[",
-        RESET = CSI + "m",
+    public static final String CSI = "\33[",
+        RESET = CSI + 'm',
+        CLEAR_DOWN = CSI + "0J",
+        CLEAR_UP = CSI + "1J",
         CLEAR = CSI + "2J",
         CLEAR_BUFFER = CSI + "3J",
         RESET_CURSOR = CSI + "H",
         CLEAR_LINE = CSI + "2K",
-        MOVE_UP = CSI + "A",
-        MOVE_DOWN = CSI + "B",
-        MOVE_RIGHT = CSI + "C",
-        MOVE_LEFT = CSI + "D",
-        MOVE_LINEUP = CSI + "E",
-        MOVE_LINEDOWN = CSI + "F",
+        MOVE_UP = CSI + 'A',
+        MOVE_DOWN = CSI + 'B',
+        MOVE_RIGHT = CSI + 'C',
+        MOVE_LEFT = CSI + 'D',
+        MOVE_LINEUP = CSI + 'E',
+        MOVE_LINEDOWN = CSI + 'F',
         BOLD = CSI + "1m",
         FAINT = CSI + "2m",
         ITALIC = CSI + "3m",
@@ -27,6 +29,7 @@ public class Anscapes {
         BLINK_SLOW = CSI + "5m",
         BLINK_FAST = CSI + "6m",
         SWAP_COLORS = CSI + "7m",
+        CONCEAL = CSI + "8m",
         DEFAULT_FONT = CSI + "10m",
         FRAKTUR = CSI + "20m",
         UNDERLINE_DOUBLE = CSI + "21m",
@@ -35,13 +38,20 @@ public class Anscapes {
         UNDERLINE_OFF = CSI + "24m",
         BLINK_OFF = CSI + "25m",
         INVERSE_OFF = CSI + "26m",
+        CONCEAL_OFF = CSI + "28m",
         DEFAULT_FOREGROUND = CSI + "39m",
         DEFAULT_BACKGROUND = CSI + "49m",
         FRAMED = CSI + "51m",
         ENCIRCLED = CSI + "52m",
         OVERLINED = CSI + "53m",
         FRAMED_OFF = CSI + "54m",
-        OVERLINED_OFF = CSI + "55m";
+        OVERLINED_OFF = CSI + "55m",
+        CURSOR_HIDE = CSI + "?25h",
+        CURSOR_SHOW = CSI + "?25l",
+        CURSOR_POS_SAVE = CSI + 's',
+        CURSOR_POS_RESTORE = CSI + 'u',
+        ALTERNATIVE_SCREEN_BUFFER = CSI + "?1049h",
+        ALTERNATIVE_SCREEN_BUFFER_OFF = CSI + "?1049l", RESET_TERMINAL = CSI + 'c';
 
     /**
      * Select an alternative font.
@@ -57,6 +67,36 @@ public class Anscapes {
             throw new IllegalArgumentException("Font number should be between 0 and 9.");
 
         return CSI + (n + 10) + 'm';
+    }
+
+    /**
+     * Select terminal mode.
+     *
+     * @param mode
+     *     the mode number, in this interval : [0,7]U[13,19].
+     *
+     * @return the corresponding ansi escape code.
+     */
+    public static String setMode(int mode) {
+
+        if (mode < 0 || (mode > 7 && mode < 13) || mode > 19)
+            throw new IllegalArgumentException("Mode should be in this interval : [0,7]U[13,19].");
+
+        return CSI + '=' + mode + 'h';
+    }
+
+    /**
+     * @param mode
+     *     the mode number, in this interval : [0,7]U[13,19].
+     *
+     * @return the corresponding ansi escape code.
+     */
+    public static String resetMode(int mode) {
+
+        if (mode < 0 || (mode > 7 && mode < 13) || mode > 19)
+            throw new IllegalArgumentException("Mode should be in this interval : [0,7]U[13,19].");
+
+        return CSI + '=' + mode + 'l';
     }
 
     /**
@@ -138,6 +178,22 @@ public class Anscapes {
     }
 
     /**
+     * Move cursor to the specified cell.
+     *
+     * @param n
+     *     the cell number
+     *
+     * @return the corresponding ansi escape code.
+     */
+    public static String moveHorizontal(int n) {
+
+        if (n <= 0)
+            n = 1;
+
+        return CSI + n + 'G';
+    }
+
+    /**
      * Move cursor at given row and col.
      *
      * @param row
@@ -148,6 +204,11 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String cursorPos(int row, int col) {
+
+        if (row <= 0)
+            row = 1;
+        if (col <= 0)
+            col = 1;
 
         return CSI + row + ";" + col + "H";
     }
@@ -212,6 +273,29 @@ public class Anscapes {
             public String bg() {
 
                 return Anscapes.CSI + "48;2;" + r + ';' + g + ';' + b + 'm';
+            }
+        };
+    }
+
+    public static AnsiColor from256code(int code) {
+
+        return new AnsiColor() {
+            @Override
+            public Color color() {
+
+                return null;
+            }
+
+            @Override
+            public String fg() {
+
+                return CSI + "38;5;" + code + 'm';
+            }
+
+            @Override
+            public String bg() {
+
+                return CSI + "48;5;" + code + 'm';
             }
         };
     }
