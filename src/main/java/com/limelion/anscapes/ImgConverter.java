@@ -6,8 +6,7 @@ import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBuffer;
 
-import static com.limelion.anscapes.AnsiColors.ColorBG;
-import static com.limelion.anscapes.AnsiColors.ColorFG;
+import static com.limelion.anscapes.Anscapes.Colors;
 
 /**
  * A copy of <a href="https://github.com/fenwick67/term-px">https://github.com/fenwick67/term-px</a> translated from JS
@@ -15,10 +14,14 @@ import static com.limelion.anscapes.AnsiColors.ColorFG;
  */
 public class ImgConverter {
 
+    /**
+     * Chars used to output image. They will hold colors.
+     */
     private static final char FULL_CHAR = '\u2588',
         TOP_CHAR = '\u2580',
         BOTTOM_CHAR = '\u2584';
-    private static final int distanceTreshold = 5;
+
+    private int ditherThreshold;
     // Smooth the image
     private boolean smoothing;
     // Color mode
@@ -36,11 +39,32 @@ public class ImgConverter {
         this.mode = builder.mode;
         this.reductionScale = builder.reductionScale;
         this.smoothing = builder.smoothing;
+        this.ditherThreshold = builder.ditherThreshold;
     }
 
     public static Builder builder() {
 
         return new Builder();
+    }
+
+    public int ditherThreshold() {
+
+        return ditherThreshold;
+    }
+
+    public boolean smoothing() {
+
+        return smoothing;
+    }
+
+    public Mode mode() {
+
+        return mode;
+    }
+
+    public int reductionScale() {
+
+        return reductionScale;
     }
 
     /**
@@ -115,52 +139,52 @@ public class ImgConverter {
 
             if (mode == Mode.ANSI_COLORS) {
 
-                ColorFG topColor = findFgColor(topPixel);
-                ColorBG topBgColor = null;
-                ColorFG bottomColor = null;
-                ColorBG bottomBgColor = findBgColor(bottomPixel);
+                Colors topColor = Anscapes.findNearestColor(topPixel, ditherThreshold);
+                Colors topBgColor = null;
+                Colors bottomColor = null;
+                Colors bottomBgColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
 
-                if (topColor == findFgColor(bottomPixel)) {
+                if (topColor == Anscapes.findNearestColor(bottomPixel, ditherThreshold)) {
 
-                    if (topColor == ColorFG.FG_BLACK)
-                        currChar = ColorBG.BG_BLACK.code() + ' ';
+                    if (topColor == Colors.BLACK)
+                        currChar = Colors.BLACK.bg() + ' ';
                     else
-                        currChar = topColor.code() + FULL_CHAR;
+                        currChar = topColor.fg() + FULL_CHAR;
 
                 } else {
 
-                    if (topColor == ColorFG.FG_BLACK || bottomBgColor == ColorBG.BG_WHITE_BRIGHT) {
-                        bottomColor = findFgColor(bottomPixel);
-                        topBgColor = findBgColor(topPixel);
-                        currChar = bottomColor.chain(topBgColor) + BOTTOM_CHAR;
+                    if (topColor == Colors.BLACK || bottomBgColor == Colors.WHITE_BRIGHT) {
+                        bottomColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
+                        topBgColor = Anscapes.findNearestColor(topPixel, ditherThreshold);
+                        currChar = bottomColor.fg() + topBgColor.bg() + BOTTOM_CHAR;
                     } else
-                        currChar = topColor.chain(bottomBgColor) + TOP_CHAR;
+                        currChar = topColor.fg() + bottomBgColor.bg() + TOP_CHAR;
 
                 }
 
                 // RGB mode implementation is still fucked up a bit (well, less than the ansi one)
             } else if (mode == Mode.RGB) {
 
-                String topColor = AnsiColors.rgbFG(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
-                String topBgColor = null;
-                String bottomColor = null;
-                String bottomBgColor = AnsiColors.rgbBG(bottomPixel.getRed(), bottomPixel.getGreen(), bottomPixel.getBlue());
+                AnsiColor topColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
+                AnsiColor topBgColor = null;
+                AnsiColor bottomColor = null;
+                AnsiColor bottomBgColor = Anscapes.rgb(bottomPixel.getRed(), bottomPixel.getGreen(), bottomPixel.getBlue());
 
                 if (topPixel.equals(bottomPixel)) {
 
-                    if (topPixel.equals(ColorFG.FG_BLACK.color()))
-                        currChar = ColorBG.BG_BLACK.code() + ' ';
+                    if (topPixel.equals(Colors.BLACK.color()))
+                        currChar = Colors.BLACK.bg() + ' ';
                     else
-                        currChar = topColor + FULL_CHAR;
+                        currChar = topColor.fg() + FULL_CHAR;
 
                 } else {
 
-                    if (topPixel.equals(ColorFG.FG_BLACK.color()) || bottomPixel.equals(ColorBG.BG_WHITE_BRIGHT.code())) {
-                        bottomColor = AnsiColors.rgbFG(bottomPixel.getRed(), bottomPixel.getGreen(), bottomPixel.getBlue());
-                        topBgColor = AnsiColors.rgbBG(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
-                        currChar = bottomColor + topBgColor + BOTTOM_CHAR;
+                    if (topPixel.equals(Colors.BLACK.color()) || bottomPixel.equals(Colors.WHITE_BRIGHT.color())) {
+                        bottomColor = Anscapes.rgb(bottomPixel.getRed(), bottomPixel.getGreen(), bottomPixel.getBlue());
+                        topBgColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
+                        currChar = bottomColor.fg() + topBgColor.bg() + BOTTOM_CHAR;
                     } else
-                        currChar = topColor + bottomBgColor + TOP_CHAR;
+                        currChar = topColor.fg() + bottomBgColor.bg() + TOP_CHAR;
 
                 }
             } else {
@@ -191,73 +215,6 @@ public class ImgConverter {
     }
 
     /**
-     * @param bottom
-     *
-     * @return the nearest ANSI color
-     */
-    private ColorBG findBgColor(Color bottom) {
-
-        ColorBG closest = null;
-        float closestDist = Float.MAX_VALUE;
-
-        for (ColorBG color : ColorBG.values()) {
-
-            float dist = rgbDistance(color.color(), bottom);
-
-            // Speedup, if low distance its a spot-on
-            if (dist < distanceTreshold) {
-                return color;
-            }
-
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = color;
-            }
-        }
-        return closest;
-    }
-
-    /**
-     * @param top
-     *
-     * @return the nearest ANSI color
-     */
-    private ColorFG findFgColor(Color top) {
-
-        ColorFG closest = null;
-        float closestDist = Float.MAX_VALUE;
-
-        for (ColorFG color : ColorFG.values()) {
-
-            float dist = rgbDistance(color.color(), top);
-
-            // Speedup, if low distance its a spot-on
-            if (dist < distanceTreshold) {
-                return color;
-            }
-
-            if (dist < closestDist) {
-                closestDist = dist;
-                closest = color;
-            }
-        }
-        return closest;
-    }
-
-    /**
-     * @param rgb1
-     * @param rgb2
-     *
-     * @return an evaluation of the distance between two color
-     */
-    private float rgbDistance(Color rgb1, Color rgb2) {
-
-        return (float) Math.sqrt(Math.pow(rgb1.getRed() - rgb2.getRed(), 2) +
-                                 Math.pow(rgb1.getGreen() - rgb2.getGreen(), 2) +
-                                 Math.pow(rgb1.getBlue() - rgb2.getBlue(), 2));
-    }
-
-    /**
      * Escape to allow copy paste. Useful for commands like 'echo -e'
      *
      * @param s
@@ -280,6 +237,7 @@ public class ImgConverter {
         private boolean smoothing = true;
         private Mode mode = Mode.ANSI_COLORS;
         private int reductionScale = 4;
+        private int ditherThreshold = 5;
 
         public Builder smoothing(boolean smoothing) {
 
@@ -299,6 +257,12 @@ public class ImgConverter {
                 throw new IllegalArgumentException("Scale must be superior to zero !");
 
             this.reductionScale = reductionScale;
+            return this;
+        }
+
+        public Builder ditherThreshold(int dt) {
+
+            this.ditherThreshold = dt;
             return this;
         }
 

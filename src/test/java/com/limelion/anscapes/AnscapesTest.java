@@ -8,7 +8,7 @@ public class AnscapesTest {
     public void test() {
 
         System.out.print(Anscapes.CLEAR);
-        System.out.println(AnsiColors.ColorFG.FG_GREEN_BRIGHT + "" + AnsiColors.ColorBG.BG_BLUE + "Some bright green text !" + Anscapes.RESET);
+        System.out.println(Anscapes.Colors.GREEN_BRIGHT.fg() + Anscapes.Colors.BLUE.bg() + "Some bright green text !" + Anscapes.RESET);
         System.out.println();
     }
 

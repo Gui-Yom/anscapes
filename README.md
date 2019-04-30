@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.LimeiloN:anscapes:0.2.0"
+    implementation "com.github.LimeiloN:anscapes:0.3.0"
 }
 ```
 
@@ -21,7 +21,3 @@ Allow easy conversion from image to colored ansi.
 Warning ! This is stolen from [https://github.com/fenwick67/term-px](https://github.com/fenwick67/term-px),
 a nice JS lib made by [Drew Harwell](https://github.com/fenwick67).
 I translated his code from JS to Java fur use into one of my projects.
-
-
-### Documentation
-None, wich clearly make this project useless for everyone except me.

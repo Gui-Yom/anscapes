@@ -45,4 +45,38 @@ public class ImgConverterTest {
         }
     }
 
+    @Test
+    public void testThreshold() {
+
+        ImgConverter converter = ImgConverter.builder()
+                                             .mode(ImgConverter.Mode.ANSI_COLORS)
+                                             .reductionScale(6)
+                                             .smoothing(true)
+                                             .ditherThreshold(-1)
+                                             .build();
+
+        try {
+            FileOutputStream out = new FileOutputStream("shield_nothreshold.txt");
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        ImgConverter converter2 = ImgConverter.builder()
+                                              .mode(ImgConverter.Mode.ANSI_COLORS)
+                                              .reductionScale(6)
+                                              .smoothing(true)
+                                              .ditherThreshold(20)
+                                              .build();
+
+        try {
+            FileOutputStream out = new FileOutputStream("shield_" + converter2.ditherThreshold() + "threshold.txt");
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
