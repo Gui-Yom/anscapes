@@ -4,7 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBuffer;
+import java.awt.image.Raster;
 
 import static com.limelion.anscapes.Anscapes.Colors;
 
@@ -25,7 +25,7 @@ public class ImgConverter {
     // Smooth the image
     private boolean smoothing;
     // Color mode
-    private Mode mode;
+    private ColorMode colorMode;
     // Resize at 1/scale
     private int reductionScale;
 
@@ -36,7 +36,7 @@ public class ImgConverter {
      */
     private ImgConverter(Builder builder) {
 
-        this.mode = builder.mode;
+        this.colorMode = builder.colorMode;
         this.reductionScale = builder.reductionScale;
         this.smoothing = builder.smoothing;
         this.ditherThreshold = builder.ditherThreshold;
@@ -57,9 +57,9 @@ public class ImgConverter {
         return smoothing;
     }
 
-    public Mode mode() {
+    public ColorMode getColorMode() {
 
-        return mode;
+        return colorMode;
     }
 
     public int reductionScale() {
@@ -70,16 +70,15 @@ public class ImgConverter {
     /**
      * Convert an image to a sequence of ansi codes.
      *
-     * @param image
-     *     the image to convert
+     * @param image the image to convert
      *
      * @return a sequence of ansi codes in the form of a String
      */
     public String convert(BufferedImage image) {
 
         // Resize image
-        int width = Math.floorDiv(image.getWidth(), reductionScale);
-        int height = Math.floorDiv(image.getHeight(), reductionScale);
+        int width = Math.floorDiv(image.getWidth(), Math.abs(reductionScale));
+        int height = Math.floorDiv(image.getHeight(), Math.abs(reductionScale));
 
         Image resized = image.getScaledInstance(width, height, smoothing ? Image.SCALE_SMOOTH : Image.SCALE_DEFAULT);
         //System.out.println("Num pixels : " + (image.getWidth() * image.getHeight()));
@@ -98,20 +97,17 @@ public class ImgConverter {
         }
         */
 
-        // Here we align the bytes
-        DataBuffer imgDataBuf = image.getData().getDataBuffer();
-
-        int[] data = new int[imgDataBuf.getSize()];
+        // Get an array containing all pixels samples
+        // of size 3 * w * h
+        Raster raster = image.getRaster();
+        int[] data = new int[raster.getDataBuffer().getSize()];
+        raster.getPixels(0, 0, width, height, data);
 
         /*
         System.out.println("Num elems : " + data.length);
         System.out.println("Num pixels : " + width * height);
         System.out.println("Expected elems : " + width * height * 3);
          */
-
-        for (int i = 0; i < data.length; ++i) {
-            data[i] = imgDataBuf.getElem(i);
-        }
 
         int i = 0;
         String lastChar = null;
@@ -137,7 +133,7 @@ public class ImgConverter {
             // TODO add more simplifications
             // TODO add more reset options (after each line of after each char)
 
-            if (mode == Mode.ANSI_COLORS) {
+            if (colorMode == ColorMode.ANSI) {
 
                 Colors topColor = Anscapes.findNearestColor(topPixel, ditherThreshold);
                 Colors topBgColor = null;
@@ -162,8 +158,8 @@ public class ImgConverter {
 
                 }
 
-                // RGB mode implementation is still fucked up a bit (well, less than the ansi one)
-            } else if (mode == Mode.RGB) {
+                // RGB getColorMode implementation is still fucked up a bit (well, less than the ansi one)
+            } else if (colorMode == ColorMode.RGB) {
 
                 AnsiColor topColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
                 AnsiColor topBgColor = null;
@@ -226,16 +222,13 @@ public class ImgConverter {
         return s.replaceAll("\n/g", "\\n").replaceAll("\r/g", "\\r").replaceAll("\033/g", "\\033");
     }
 
-    public enum Mode {
-
-        RGB,
-        ANSI_COLORS
-    }
-
+    /**
+     * Utility class to create an ImgConverter
+     */
     public static class Builder {
 
         private boolean smoothing = true;
-        private Mode mode = Mode.ANSI_COLORS;
+        private ColorMode colorMode = ColorMode.ANSI;
         private int reductionScale = 4;
         private int ditherThreshold = 5;
 
@@ -245,9 +238,9 @@ public class ImgConverter {
             return this;
         }
 
-        public Builder mode(ImgConverter.Mode mode) {
+        public Builder mode(ColorMode colorMode) {
 
-            this.mode = mode;
+            this.colorMode = colorMode;
             return this;
         }
 

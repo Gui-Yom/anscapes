@@ -51,13 +51,13 @@ public class Anscapes {
         CURSOR_POS_SAVE = CSI + 's',
         CURSOR_POS_RESTORE = CSI + 'u',
         ALTERNATIVE_SCREEN_BUFFER = CSI + "?1049h",
-        ALTERNATIVE_SCREEN_BUFFER_OFF = CSI + "?1049l", RESET_TERMINAL = CSI + 'c';
+        ALTERNATIVE_SCREEN_BUFFER_OFF = CSI + "?1049l",
+        RESET_TERMINAL = CSI + 'c';
 
     /**
      * Select an alternative font.
      *
-     * @param n
-     *     the font number to use. Between 0 and 9 where 0 is the default font.
+     * @param n the font number to use. Between 0 and 9 where 0 is the default font.
      *
      * @return the corresponding ansi escape code.
      */
@@ -70,31 +70,29 @@ public class Anscapes {
     }
 
     /**
-     * Select terminal mode.
+     * Select terminal getColorMode.
      *
-     * @param mode
-     *     the mode number, in this interval : [0,7]U[13,19].
+     * @param mode the getColorMode number, in this interval : [0,7]U[13,19].
      *
      * @return the corresponding ansi escape code.
      */
     public static String setMode(int mode) {
 
         if (mode < 0 || (mode > 7 && mode < 13) || mode > 19)
-            throw new IllegalArgumentException("Mode should be in this interval : [0,7]U[13,19].");
+            throw new IllegalArgumentException("ColorMode should be in this interval : [0,7]U[13,19].");
 
         return CSI + '=' + mode + 'h';
     }
 
     /**
-     * @param mode
-     *     the mode number, in this interval : [0,7]U[13,19].
+     * @param mode the getColorMode number, in this interval : [0,7]U[13,19].
      *
      * @return the corresponding ansi escape code.
      */
     public static String resetMode(int mode) {
 
         if (mode < 0 || (mode > 7 && mode < 13) || mode > 19)
-            throw new IllegalArgumentException("Mode should be in this interval : [0,7]U[13,19].");
+            throw new IllegalArgumentException("ColorMode should be in this interval : [0,7]U[13,19].");
 
         return CSI + '=' + mode + 'l';
     }
@@ -102,8 +100,7 @@ public class Anscapes {
     /**
      * Move cursor up n cells.
      *
-     * @param n
-     *     the number of cells
+     * @param n the number of cells
      *
      * @return the corresponding ansi escape code.
      */
@@ -115,8 +112,7 @@ public class Anscapes {
     /**
      * Move cursor down n cells.
      *
-     * @param n
-     *     the number of cells
+     * @param n the number of cells
      *
      * @return the corresponding ansi escape code.
      */
@@ -128,8 +124,7 @@ public class Anscapes {
     /**
      * Move cursor right n cells.
      *
-     * @param n
-     *     the number of cells
+     * @param n the number of cells
      *
      * @return the corresponding ansi escape code.
      */
@@ -141,8 +136,7 @@ public class Anscapes {
     /**
      * Move cursor left n cells.
      *
-     * @param n
-     *     the number of cells
+     * @param n the number of cells
      *
      * @return the corresponding ansi escape code.
      */
@@ -154,8 +148,7 @@ public class Anscapes {
     /**
      * Move cursor n lines after.
      *
-     * @param n
-     *     the number of lines
+     * @param n the number of lines
      *
      * @return the corresponding ansi escape code.
      */
@@ -167,8 +160,7 @@ public class Anscapes {
     /**
      * Move cursor n lines before.
      *
-     * @param n
-     *     the number of lines
+     * @param n the number of lines
      *
      * @return the corresponding ansi escape code.
      */
@@ -180,8 +172,7 @@ public class Anscapes {
     /**
      * Move cursor to the specified cell.
      *
-     * @param n
-     *     the cell number
+     * @param n the cell number
      *
      * @return the corresponding ansi escape code.
      */
@@ -196,10 +187,8 @@ public class Anscapes {
     /**
      * Move cursor at given row and col.
      *
-     * @param row
-     *     the row number
-     * @param col
-     *     the column number
+     * @param row the row number
+     * @param col the column number
      *
      * @return the corresponding ansi escape code.
      */
@@ -244,12 +233,9 @@ public class Anscapes {
     /**
      * Create a new AnsiColor from its rgb code, only for terminals supporting 24bit color.
      *
-     * @param r
-     *     the red component
-     * @param g
-     *     the green component
-     * @param b
-     *     the blue component
+     * @param r the red component
+     * @param g the green component
+     * @param b the blue component
      *
      * @return the corresponding ansi escape code
      */
@@ -301,10 +287,8 @@ public class Anscapes {
     }
 
     /**
-     * @param c
-     *     the color to convert
-     * @param threshold
-     *     distance to evaluate a spot-on
+     * @param c         the color to convert
+     * @param threshold distance to evaluate a spot-on
      *
      * @return the nearest ansi color
      */

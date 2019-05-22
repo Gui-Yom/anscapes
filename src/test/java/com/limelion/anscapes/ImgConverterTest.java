@@ -13,7 +13,7 @@ public class ImgConverterTest {
     public void testAnsiColors() {
 
         ImgConverter converter = ImgConverter.builder()
-                                             .mode(ImgConverter.Mode.ANSI_COLORS)
+                                             .mode(ColorMode.ANSI)
                                              .reductionScale(6)
                                              .smoothing(true)
                                              .build();
@@ -31,7 +31,7 @@ public class ImgConverterTest {
     public void testRgbColors() {
 
         ImgConverter converter = ImgConverter.builder()
-                                             .mode(ImgConverter.Mode.RGB)
+                                             .mode(ColorMode.RGB)
                                              .reductionScale(6)
                                              .smoothing(true)
                                              .build();
@@ -49,7 +49,7 @@ public class ImgConverterTest {
     public void testThreshold() {
 
         ImgConverter converter = ImgConverter.builder()
-                                             .mode(ImgConverter.Mode.ANSI_COLORS)
+                                             .mode(ColorMode.ANSI)
                                              .reductionScale(6)
                                              .smoothing(true)
                                              .ditherThreshold(-1)
@@ -64,7 +64,7 @@ public class ImgConverterTest {
         }
 
         ImgConverter converter2 = ImgConverter.builder()
-                                              .mode(ImgConverter.Mode.ANSI_COLORS)
+                                              .mode(ColorMode.ANSI)
                                               .reductionScale(6)
                                               .smoothing(true)
                                               .ditherThreshold(20)
