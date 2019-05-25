@@ -19,7 +19,8 @@ public class ImgConverter {
      */
     private static final char FULL_CHAR = '\u2588',
         TOP_CHAR = '\u2580',
-        BOTTOM_CHAR = '\u2584';
+        BOTTOM_CHAR = '\u2584',
+        EMPTY_CHAR = ' ';
 
     private int ditherThreshold;
     // Smooth the image
@@ -27,7 +28,7 @@ public class ImgConverter {
     // Color mode
     private ColorMode colorMode;
     // Resize at 1/scale
-    private int reductionScale;
+    private float scale;
 
     /**
      * Use builder instead
@@ -37,7 +38,7 @@ public class ImgConverter {
     private ImgConverter(Builder builder) {
 
         this.colorMode = builder.colorMode;
-        this.reductionScale = builder.reductionScale;
+        this.scale = builder.scale;
         this.smoothing = builder.smoothing;
         this.ditherThreshold = builder.ditherThreshold;
     }
@@ -62,9 +63,9 @@ public class ImgConverter {
         return colorMode;
     }
 
-    public int reductionScale() {
+    public float reductionScale() {
 
-        return reductionScale;
+        return scale;
     }
 
     /**
@@ -74,16 +75,15 @@ public class ImgConverter {
      *
      * @return a sequence of ansi codes in the form of a String
      */
-    public String convert(BufferedImage image) {
+    public TextImage convert(BufferedImage image) {
 
         // Resize image
-        int width = Math.floorDiv(image.getWidth(), Math.abs(reductionScale));
-        int height = Math.floorDiv(image.getHeight(), Math.abs(reductionScale));
+        int width = (int) (image.getWidth() * scale);
+        int height = (int) (image.getHeight() * scale);
 
         Image resized = image.getScaledInstance(width, height, smoothing ? Image.SCALE_SMOOTH : Image.SCALE_DEFAULT);
         //System.out.println("Num pixels : " + (image.getWidth() * image.getHeight()));
 
-        // DO NOT FORGET ITS 'BGR' NOT 'RGB'
         image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
         Graphics2D g = image.createGraphics();
         g.drawImage(resized, 0, 0, null);
@@ -110,55 +110,54 @@ public class ImgConverter {
          */
 
         int i = 0;
-        String lastChar = null;
+        Pixel lastRPixel = null;
         StringBuilder converted = new StringBuilder();
 
         while (i < data.length) {
 
-            Color topPixel = new Color(data[i + 2], data[i + 1], data[i]);
+            Color topPixel = new Color(data[i], data[i + 1], data[i + 2]);
             Color bottomPixel = null;
 
             // Check if another line exists, else assume black
             if (i + width * 3 + 2 < data.length) {
-                bottomPixel = new Color(data[i + width * 3 + 2],
+                bottomPixel = new Color(data[i + width * 3],
                                         data[i + width * 3 + 1],
-                                        data[i + width * 3]);
+                                        data[i + width * 3 + 2]);
             } else {
                 bottomPixel = Color.BLACK;
             }
 
-            // Code for current pixel
-            String currChar = null;
+            // Code for current rendered pixel
+            Pixel currentRPixel = null;
 
-            // TODO add more simplifications
             // TODO add more reset options (after each line of after each char)
 
             if (colorMode == ColorMode.ANSI) {
 
                 Colors topColor = Anscapes.findNearestColor(topPixel, ditherThreshold);
                 Colors topBgColor = null;
-                Colors bottomColor = null;
-                Colors bottomBgColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
+                Colors bottomColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
+                Colors bottomBgColor = null;
 
-                if (topColor == Anscapes.findNearestColor(bottomPixel, ditherThreshold)) {
+                // If top pixel is the same as bottom pixel
+                if (topColor == bottomColor) {
 
                     if (topColor == Colors.BLACK)
-                        currChar = Colors.BLACK.bg() + ' ';
+                        currentRPixel = new Pixel(null, Colors.BLACK, EMPTY_CHAR);
                     else
-                        currChar = topColor.fg() + FULL_CHAR;
+                        currentRPixel = new Pixel(topColor, null, FULL_CHAR);
 
                 } else {
 
+                    bottomBgColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
+
                     if (topColor == Colors.BLACK || bottomBgColor == Colors.WHITE_BRIGHT) {
-                        bottomColor = Anscapes.findNearestColor(bottomPixel, ditherThreshold);
-                        topBgColor = Anscapes.findNearestColor(topPixel, ditherThreshold);
-                        currChar = bottomColor.fg() + topBgColor.bg() + BOTTOM_CHAR;
+                        currentRPixel = new Pixel(bottomColor, topColor, BOTTOM_CHAR);
                     } else
-                        currChar = topColor.fg() + bottomBgColor.bg() + TOP_CHAR;
+                        currentRPixel = new Pixel(topColor, bottomBgColor, TOP_CHAR);
 
                 }
 
-                // RGB getColorMode implementation is still fucked up a bit (well, less than the ansi one)
             } else if (colorMode == ColorMode.RGB) {
 
                 AnsiColor topColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
@@ -169,45 +168,40 @@ public class ImgConverter {
                 if (topPixel.equals(bottomPixel)) {
 
                     if (topPixel.equals(Colors.BLACK.color()))
-                        currChar = Colors.BLACK.bg() + ' ';
+                        currentRPixel = new Pixel(null, Colors.BLACK, EMPTY_CHAR);
                     else
-                        currChar = topColor.fg() + FULL_CHAR;
+                        currentRPixel = new Pixel(topColor, null, FULL_CHAR);
 
                 } else {
 
                     if (topPixel.equals(Colors.BLACK.color()) || bottomPixel.equals(Colors.WHITE_BRIGHT.color())) {
                         bottomColor = Anscapes.rgb(bottomPixel.getRed(), bottomPixel.getGreen(), bottomPixel.getBlue());
                         topBgColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
-                        currChar = bottomColor.fg() + topBgColor.bg() + BOTTOM_CHAR;
+                        currentRPixel = new Pixel(bottomColor, topBgColor, BOTTOM_CHAR);
                     } else
-                        currChar = topColor.fg() + bottomBgColor.bg() + TOP_CHAR;
+                        currentRPixel = new Pixel(topColor, bottomBgColor, TOP_CHAR);
 
                 }
-            } else {
-
-                // What else ?
-                // Cmon its not possible, enjoy Java 12
-            }
+            } else { }
 
             // Save space if last code equals current code
-            if (currChar.equals(lastChar)) {
-                // Ugly af
-                converted.append(currChar.replaceAll("[\\033m;\\d\\\\\\[]", ""));
-            } else {
-                converted.append(currChar);
-            }
+            // This is rly important
+            if (currentRPixel.colorsEquals(lastRPixel))
+                converted.append(currentRPixel.getClear());
+            else
+                converted.append(currentRPixel);
 
-            lastChar = currChar;
+            lastRPixel = currentRPixel;
 
             i += 3;
             if ((i / 3) % width == 0) {
                 converted.append(Anscapes.RESET).append(System.lineSeparator());
                 i += width * 3;
-                lastChar = null;
+                lastRPixel = null;
             }
         }
 
-        return converted.toString();
+        return new TextImage(converted.toString(), width, height, colorMode);
     }
 
     /**
@@ -229,7 +223,7 @@ public class ImgConverter {
 
         private boolean smoothing = true;
         private ColorMode colorMode = ColorMode.ANSI;
-        private int reductionScale = 4;
+        private float scale = 0.25f;
         private int ditherThreshold = 5;
 
         public Builder smoothing(boolean smoothing) {
@@ -244,12 +238,14 @@ public class ImgConverter {
             return this;
         }
 
-        public Builder reductionScale(int reductionScale) {
+        public Builder scale(float scale) {
 
-            if (reductionScale <= 0)
+            System.out.println(scale);
+
+            if (scale <= 0)
                 throw new IllegalArgumentException("Scale must be superior to zero !");
 
-            this.reductionScale = reductionScale;
+            this.scale = scale;
             return this;
         }
 
@@ -262,6 +258,45 @@ public class ImgConverter {
         public ImgConverter build() {
 
             return new ImgConverter(this);
+        }
+    }
+
+    private class Pixel {
+
+        AnsiColor fgColor;
+        AnsiColor bgColor;
+        char character;
+
+        Pixel(AnsiColor fgColor, AnsiColor bgColor, char character) {
+
+            this.fgColor = fgColor;
+            this.bgColor = bgColor;
+            this.character = character;
+        }
+
+        @Override
+        public String toString() {
+
+            return (fgColor != null ? fgColor.fg() : "") + (bgColor != null ? bgColor.bg() : "") + character;
+        }
+
+        public boolean colorsEquals(Object obj) {
+
+            if (obj instanceof Pixel) {
+                Pixel other = (Pixel) obj;
+                boolean result = true;
+                if (fgColor != null)
+                    result &= fgColor.equals(other.fgColor);
+                if (bgColor != null)
+                    result &= bgColor.equals(other.bgColor);
+                return result;
+            }
+            return false;
+        }
+
+        public Pixel getClear() {
+
+            return new Pixel(null, null, character);
         }
     }
 }

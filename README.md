@@ -1,6 +1,6 @@
 # anscapes
 An utility registering some ansi escape code. 
-Mainly for colored console output.
+Mainly for colored terminal output.
 
 ### Grab it
 Using Jitpack and your build manager of choice (here Gradle) : 
@@ -12,12 +12,13 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.LimeiloN:anscapes:0.5.0"
+    implementation "com.github.LimeiloN:anscapes:0.6.0"
 }
 ```
 
 ### Image to Ansi converter
-Allow easy conversion from image to colored ansi.
-Warning ! This is stolen from [https://github.com/fenwick67/term-px](https://github.com/fenwick67/term-px),
+Allows you to convert an Image to a colored String.
+This is highly inspired from [https://github.com/fenwick67/term-px](https://github.com/fenwick67/term-px),
 a nice JS lib made by [Drew Harwell](https://github.com/fenwick67).
-I translated his code from JS to Java for use into one of my projects.
+I started from his code, removed what I did not need and added some optimizations.
+All of the process is highly configurable.

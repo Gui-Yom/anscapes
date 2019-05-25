@@ -1,5 +1,6 @@
 package com.limelion.anscapes;
 
+import java.awt.Image;
 import java.awt.image.BufferedImage;
 
 public class TextImage {
@@ -15,23 +16,6 @@ public class TextImage {
         this.width = width;
         this.height = height;
         this.colorMode = colorMode;
-    }
-
-    public TextImage(ImgConverter converter, BufferedImage image) {
-
-        this(converter.convert(image),
-             Math.floorDiv(image.getWidth(), converter.reductionScale()),
-             Math.floorDiv(image.getHeight(), converter.reductionScale()),
-             converter.getColorMode());
-    }
-
-    public TextImage(BufferedImage image, ColorMode colorMode, int reductionScale) {
-
-        this(ImgConverter.builder()
-                         .mode(colorMode)
-                         .reductionScale(reductionScale)
-                         .smoothing(true)
-                         .build(), image);
     }
 
     public String getImage() {

@@ -14,13 +14,13 @@ public class ImgConverterTest {
 
         ImgConverter converter = ImgConverter.builder()
                                              .mode(ColorMode.ANSI)
-                                             .reductionScale(6)
+                                             .scale((float) 1 / 6)
                                              .smoothing(true)
                                              .build();
 
         try {
             FileOutputStream out = new FileOutputStream("shield_ansi.txt");
-            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getImage().getBytes(StandardCharsets.UTF_8));
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -32,13 +32,13 @@ public class ImgConverterTest {
 
         ImgConverter converter = ImgConverter.builder()
                                              .mode(ColorMode.RGB)
-                                             .reductionScale(6)
+                                             .scale((float) 1 / 6)
                                              .smoothing(true)
                                              .build();
 
         try {
             FileOutputStream out = new FileOutputStream("shield_rgb.txt");
-            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getImage().getBytes(StandardCharsets.UTF_8));
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -50,14 +50,14 @@ public class ImgConverterTest {
 
         ImgConverter converter = ImgConverter.builder()
                                              .mode(ColorMode.ANSI)
-                                             .reductionScale(6)
+                                             .scale((float) 1 / 6)
                                              .smoothing(true)
                                              .ditherThreshold(-1)
                                              .build();
 
         try {
             FileOutputStream out = new FileOutputStream("shield_nothreshold.txt");
-            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getImage().getBytes(StandardCharsets.UTF_8));
             out.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -65,14 +65,14 @@ public class ImgConverterTest {
 
         ImgConverter converter2 = ImgConverter.builder()
                                               .mode(ColorMode.ANSI)
-                                              .reductionScale(6)
+                                              .scale((float) 1 / 6)
                                               .smoothing(true)
                                               .ditherThreshold(20)
                                               .build();
 
         try {
             FileOutputStream out = new FileOutputStream("shield_" + converter2.ditherThreshold() + "threshold.txt");
-            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getBytes(StandardCharsets.UTF_8));
+            out.write(converter.convert(ImageIO.read(getClass().getResourceAsStream("shield.png"))).getImage().getBytes(StandardCharsets.UTF_8));
             out.close();
         } catch (IOException e) {
             e.printStackTrace();

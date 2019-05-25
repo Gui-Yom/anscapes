@@ -260,6 +260,16 @@ public class Anscapes {
 
                 return Anscapes.CSI + "48;2;" + r + ';' + g + ';' + b + 'm';
             }
+
+            @Override
+            public boolean equals(Object obj) {
+
+                if (obj instanceof AnsiColor) {
+                    AnsiColor other = (AnsiColor) obj;
+                    return color().equals(other.color());
+                }
+                return false;
+            }
         };
     }
 
@@ -388,6 +398,16 @@ public class Anscapes {
         public int col() {
 
             return col;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+
+            if (obj instanceof CursorPos) {
+                CursorPos other = (CursorPos) obj;
+                return row == other.row && col == other.col;
+            }
+            return false;
         }
     }
 }
