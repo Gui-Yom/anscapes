@@ -4,13 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.awt.image.Raster;
 
 import static com.limelion.anscapes.Anscapes.Colors;
 
 /**
- * A copy of <a href="https://github.com/fenwick67/term-px">https://github.com/fenwick67/term-px</a> translated from JS
- * to Java. Allow conversion from image to ansi codes sequences.
+ * A translation of <a href="https://github.com/fenwick67/term-px">https://github.com/fenwick67/term-px</a> from JS to
+ * Java and optimized a bit. It permits conversion from image to ansi codes sequences, allowing to draw images on the
+ * terminal.
  */
 public class ImgConverter {
 
@@ -24,7 +24,7 @@ public class ImgConverter {
 
     private int ditherThreshold;
     // Smooth the image
-    private boolean smoothing;
+    private Scaling scaling;
     // Color mode
     private ColorMode colorMode;
     // Resize at 1/scale
@@ -39,7 +39,7 @@ public class ImgConverter {
 
         this.colorMode = builder.colorMode;
         this.scale = builder.scale;
-        this.smoothing = builder.smoothing;
+        this.scaling = builder.scaling;
         this.ditherThreshold = builder.ditherThreshold;
     }
 
@@ -48,14 +48,75 @@ public class ImgConverter {
         return new Builder();
     }
 
+    /**
+     * Escape to allow copy paste. Useful for commands like 'echo -e'
+     *
+     * @param s
+     *
+     * @return the escaped code
+     */
+    public static String escape(String s) {
+
+        return s.replaceAll("\n/g", "\\n").replaceAll("\r/g", "\\r").replaceAll("\033/g", "\\033");
+    }
+
+    public static BufferedImage resize(BufferedImage original, float scale) {
+
+        int width = original.getWidth();
+        int height = original.getHeight();
+        int newWidth = (int) (width * scale);
+        int newHeight = (int) (height * scale);
+
+        int[] rawInput = new int[width * height];
+        original.getRGB(0, 0, width, height, rawInput, 0, width);
+
+        int[] rawOutput = new int[newWidth * newHeight];
+
+        // YD compensates for the x loop by subtracting the width back out
+        int YD = (height / newHeight) * width - width;
+        int YR = height % newHeight;
+        int XD = width / newWidth;
+        int XR = width % newWidth;
+        int outOffset = 0;
+        int inOffset = 0;
+
+        for (int y = newHeight, YE = 0; y > 0; y--) {
+            for (int x = newWidth, XE = 0; x > 0; x--) {
+                rawOutput[outOffset++] = rawInput[inOffset];
+                inOffset += XD;
+                XE += XR;
+                if (XE >= newWidth) {
+                    XE -= newWidth;
+                    inOffset++;
+                }
+            }
+            inOffset += YD;
+            YE += YR;
+            if (YE >= newHeight) {
+                YE -= newHeight;
+                inOffset += width;
+            }
+        }
+
+        BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
+
+        for (int y = 0; y < newHeight; y++) {
+            for (int x = 0; x < newWidth; x++) {
+                resized.setRGB(x, y, rawOutput[y * newWidth + x]);
+            }
+        }
+
+        return resized;
+    }
+
     public int ditherThreshold() {
 
         return ditherThreshold;
     }
 
-    public boolean smoothing() {
+    public Scaling scaling() {
 
-        return smoothing;
+        return scaling;
     }
 
     public ColorMode getColorMode() {
@@ -78,30 +139,33 @@ public class ImgConverter {
     public TextImage convert(BufferedImage image) {
 
         // Resize image
+        long startTime = System.nanoTime();
+
         int width = (int) (image.getWidth() * scale);
         int height = (int) (image.getHeight() * scale);
 
-        Image resized = image.getScaledInstance(width, height, smoothing ? Image.SCALE_SMOOTH : Image.SCALE_DEFAULT);
-        //System.out.println("Num pixels : " + (image.getWidth() * image.getHeight()));
+        // TODO image resize & pixel extraction
 
-        image = new BufferedImage(width, height, BufferedImage.TYPE_3BYTE_BGR);
-        Graphics2D g = image.createGraphics();
-        g.drawImage(resized, 0, 0, null);
-        g.dispose();
+        if (scale != 1)
+            if (scaling == Scaling.ALT)
+                image = resize(image, scale);
+            else {
+                Image resized = image.getScaledInstance(width, height, scaling == Scaling.SMOOTH ? Image.SCALE_SMOOTH : Image.SCALE_FAST);
+                image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = image.createGraphics();
+                g.drawImage(resized, 0, 0, null);
+                g.dispose();
+            }
 
-        /*
-        try {
-            ImageIO.write(image, "png", new File("resized.png"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        */
+        System.out.printf("Rescaling time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
 
-        // Get an array containing all pixels samples
-        // of size 3 * w * h
-        Raster raster = image.getRaster();
-        int[] data = new int[raster.getDataBuffer().getSize()];
-        raster.getPixels(0, 0, width, height, data);
+        startTime = System.nanoTime();
+        // Get an array containing all pixels samples of size w * h
+        int[] data = image.getRGB(0, 0, width, height, null, 0, width);
+
+        System.out.printf("Pixel extraction time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
+
+        startTime = System.nanoTime();
 
         /*
         System.out.println("Num elems : " + data.length);
@@ -115,14 +179,12 @@ public class ImgConverter {
 
         while (i < data.length) {
 
-            Color topPixel = new Color(data[i], data[i + 1], data[i + 2]);
+            Color topPixel = new Color(data[i]);
             Color bottomPixel = null;
 
             // Check if another line exists, else assume black
-            if (i + width * 3 + 2 < data.length) {
-                bottomPixel = new Color(data[i + width * 3],
-                                        data[i + width * 3 + 1],
-                                        data[i + width * 3 + 2]);
+            if (i + width < data.length) {
+                bottomPixel = new Color(data[i + width]);
             } else {
                 bottomPixel = Color.BLACK;
             }
@@ -193,27 +255,23 @@ public class ImgConverter {
 
             lastRPixel = currentRPixel;
 
-            i += 3;
-            if ((i / 3) % width == 0) {
+            ++i;
+            if (i % width == 0) {
                 converted.append(Anscapes.RESET).append(System.lineSeparator());
-                i += width * 3;
+                i += width;
                 lastRPixel = null;
             }
         }
+        System.out.printf("Conversion time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
 
         return new TextImage(converted.toString(), width, height, colorMode);
     }
 
-    /**
-     * Escape to allow copy paste. Useful for commands like 'echo -e'
-     *
-     * @param s
-     *
-     * @return the escaped code
-     */
-    public String escape(String s) {
+    public enum Scaling {
 
-        return s.replaceAll("\n/g", "\\n").replaceAll("\r/g", "\\r").replaceAll("\033/g", "\\033");
+        FAST,
+        SMOOTH,
+        ALT
     }
 
     /**
@@ -221,14 +279,14 @@ public class ImgConverter {
      */
     public static class Builder {
 
-        private boolean smoothing = true;
+        private Scaling scaling = Scaling.FAST;
         private ColorMode colorMode = ColorMode.ANSI;
         private float scale = 0.25f;
         private int ditherThreshold = 5;
 
-        public Builder smoothing(boolean smoothing) {
+        public Builder scaling(Scaling scaling) {
 
-            this.smoothing = smoothing;
+            this.scaling = scaling;
             return this;
         }
 
@@ -239,8 +297,6 @@ public class ImgConverter {
         }
 
         public Builder scale(float scale) {
-
-            System.out.println(scale);
 
             if (scale <= 0)
                 throw new IllegalArgumentException("Scale must be superior to zero !");

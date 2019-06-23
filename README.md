@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.LimeiloN:anscapes:0.6.0"
+    implementation "com.github.LimeiloN:anscapes:0.7.0"
 }
 ```
 
@@ -21,4 +21,4 @@ Allows you to convert an Image to a colored String.
 This is highly inspired from [https://github.com/fenwick67/term-px](https://github.com/fenwick67/term-px),
 a nice JS lib made by [Drew Harwell](https://github.com/fenwick67).
 I started from his code, removed what I did not need and added some optimizations.
-All of the process is highly configurable.
+The process is configurable.

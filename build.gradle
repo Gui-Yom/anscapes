@@ -1,14 +1,12 @@
 plugins {
-    id 'java'
     id 'java-library'
-    id 'maven'
 }
 
 group 'com.limelion'
-version '0.6.0'
+version '0.7.0'
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 repositories {
     mavenLocal()
@@ -27,4 +25,9 @@ test {
 
 tasks.withType(JavaCompile) {
     options.encoding = 'UTF-8'
+}
+
+clean.doFirst {
+    delete "temp"
+    delete "out"
 }
