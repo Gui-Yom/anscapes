@@ -139,7 +139,7 @@ public class ImgConverter {
     public TextImage convert(BufferedImage image) {
 
         // Resize image
-        long startTime = System.nanoTime();
+        //long startTime = System.nanoTime();
 
         int width = (int) (image.getWidth() * scale);
         int height = (int) (image.getHeight() * scale);
@@ -157,15 +157,15 @@ public class ImgConverter {
                 g.dispose();
             }
 
-        System.out.printf("Rescaling time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
+        //System.out.printf("Rescaling time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
 
-        startTime = System.nanoTime();
+        //startTime = System.nanoTime();
         // Get an array containing all pixels samples of size w * h
         int[] data = image.getRGB(0, 0, width, height, null, 0, width);
 
-        System.out.printf("Pixel extraction time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
+        //System.out.printf("Pixel extraction time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
 
-        startTime = System.nanoTime();
+        //startTime = System.nanoTime();
 
         /*
         System.out.println("Num elems : " + data.length);
@@ -262,7 +262,7 @@ public class ImgConverter {
                 lastRPixel = null;
             }
         }
-        System.out.printf("Conversion time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
+        //System.out.printf("Conversion time : %f µs%n", (System.nanoTime() - startTime) / 1000.0f);
 
         return new TextImage(converted.toString(), width, height, colorMode);
     }
