@@ -64,6 +64,23 @@ public class ImgConverter {
         this.targetHeight = targetHeight;
     }
 
+    public ColorMode getColorMode() {
+
+        return colorMode;
+    }
+
+    public void setColorMode(ColorMode colorMode) {
+        this.colorMode = colorMode;
+    }
+
+    /**
+     * Resize pixels to the target dimensions
+     *
+     * @param pixels         the pixel data
+     * @param originalWidth  the original pixel array width
+     * @param originalHeight the original pixel array height
+     * @return the resized pixel data
+     */
     public int[] resize(int[] pixels, int originalWidth, int originalHeight) {
 
         int[] resized = new int[targetWidth * targetHeight];
@@ -83,11 +100,6 @@ public class ImgConverter {
         return resized;
     }
 
-    public ColorMode getColorMode() {
-
-        return colorMode;
-    }
-
     /**
      * Convert an image to a sequence of ansi codes.
      *
@@ -99,6 +111,25 @@ public class ImgConverter {
         return new TerminalImage(convertToSequence(image), targetWidth, targetHeight, colorMode);
     }
 
+    /**
+     * Convert a pixel array to a TerminalImage
+     *
+     * @param data           the pixel array
+     * @param originalWidth  the pixel array width
+     * @param originalHeight the pixel array height
+     * @return the created TerminalImage instance
+     */
+    public TerminalImage convert(int[] data, int originalWidth, int originalHeight) {
+
+        return new TerminalImage(convertToSequence(data, originalWidth, originalHeight), targetWidth, targetHeight, colorMode);
+    }
+
+    /**
+     * Convert a BufferedImage to an ansi sequence
+     *
+     * @param image the image to convert
+     * @return the ansi sequence
+     */
     public String convertToSequence(BufferedImage image) {
 
         int[] data = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
@@ -106,11 +137,14 @@ public class ImgConverter {
         return convertToSequence(data, image.getWidth(), image.getHeight());
     }
 
-    public TerminalImage convert(int[] data, int originalWidth, int originalHeight) {
-
-        return new TerminalImage(convertToSequence(data, originalWidth, originalHeight), targetWidth, targetHeight, colorMode);
-    }
-
+    /**
+     * Convert a pixel array to an ansi sequence
+     *
+     * @param data           the pixel array
+     * @param originalWidth  the pixel array width
+     * @param originalHeight the pixel array height
+     * @return the ansi sequence
+     */
     public String convertToSequence(int[] data, int originalWidth, int originalHeight) {
 
         if (originalWidth != targetWidth || originalHeight != targetHeight)
@@ -165,7 +199,7 @@ public class ImgConverter {
                 }
             } else if (colorMode == ColorMode.RGB) {
 
-                // TODO add rgb compression (as a treshold)
+                // TODO add rgb compression (as a treshold) to save even more space
 
                 AnsiColor topColor = Anscapes.rgb(topPixel.getRed(), topPixel.getGreen(), topPixel.getBlue());
                 AnsiColor topBgColor = null;

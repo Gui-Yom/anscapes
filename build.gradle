@@ -5,10 +5,45 @@ plugins {
 
 ext.moduleName = "com.github.LimeiloN.anscapes"
 group 'com.github.LimeiloN'
-version '0.8.0'
+version '0.8.1'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+java {
+    withJavadocJar()
+    withSourcesJar()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            pom {
+                name = 'anscapes'
+                description = 'Color codes and images for your terminal'
+                url = 'https://github.com/LimeiloN/anscapes'
+                licenses {
+                    license {
+                        name = 'MIT License'
+                        url = 'https://github.com/LimeiloN/anscapes/blob/master/LICENSE'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'LimeiloN'
+                        name = 'Guillaume Anthouard'
+                    }
+                }
+                scm {
+                    connection = 'scm:git:git://github.com/LimeiloN/anscapes.git'
+                    developerConnection = 'scm:git:ssh://github.com/LimeiloN/anscapes.git'
+                    url = 'https://github.com/LimeiloN/anscapes/'
+                }
+            }
+        }
+    }
+}
 
 repositories {
     mavenLocal()
