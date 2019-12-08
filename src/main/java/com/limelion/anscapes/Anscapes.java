@@ -5,60 +5,60 @@ import java.io.IOException;
 
 /**
  * Contains about everything you need to manipulate the terminal using ansi escape codes.
+ * Note that terminal won't render them unless you use things like jansi.
  */
 public class Anscapes {
 
     public static final String CSI = "\33[",
-        RESET = CSI + 'm',
-        CLEAR_DOWN = CSI + "0J",
-        CLEAR_UP = CSI + "1J",
-        CLEAR = CSI + "2J",
-        CLEAR_BUFFER = CSI + "3J",
-        RESET_CURSOR = CSI + "H",
-        CLEAR_LINE = CSI + "2K",
-        MOVE_UP = CSI + 'A',
-        MOVE_DOWN = CSI + 'B',
-        MOVE_RIGHT = CSI + 'C',
-        MOVE_LEFT = CSI + 'D',
-        MOVE_LINEUP = CSI + 'E',
-        MOVE_LINEDOWN = CSI + 'F',
-        BOLD = CSI + "1m",
-        FAINT = CSI + "2m",
-        ITALIC = CSI + "3m",
-        UNDERLINE = CSI + "4m",
-        BLINK_SLOW = CSI + "5m",
-        BLINK_FAST = CSI + "6m",
-        SWAP_COLORS = CSI + "7m",
-        CONCEAL = CSI + "8m",
-        DEFAULT_FONT = CSI + "10m",
-        FRAKTUR = CSI + "20m",
-        UNDERLINE_DOUBLE = CSI + "21m",
-        NORMAL = CSI + "22m",
-        ITALIC_OFF = CSI + "23m",
-        UNDERLINE_OFF = CSI + "24m",
-        BLINK_OFF = CSI + "25m",
-        INVERSE_OFF = CSI + "26m",
-        CONCEAL_OFF = CSI + "28m",
-        DEFAULT_FOREGROUND = CSI + "39m",
-        DEFAULT_BACKGROUND = CSI + "49m",
-        FRAMED = CSI + "51m",
-        ENCIRCLED = CSI + "52m",
-        OVERLINED = CSI + "53m",
-        FRAMED_OFF = CSI + "54m",
-        OVERLINED_OFF = CSI + "55m",
-        CURSOR_HIDE = CSI + "?25h",
-        CURSOR_SHOW = CSI + "?25l",
-        CURSOR_POS_SAVE = CSI + 's',
-        CURSOR_POS_RESTORE = CSI + 'u',
-        ALTERNATIVE_SCREEN_BUFFER = CSI + "?1049h",
-        ALTERNATIVE_SCREEN_BUFFER_OFF = CSI + "?1049l",
-        RESET_TERMINAL = CSI + 'c';
+            RESET = CSI + 'm',
+            CLEAR_DOWN = CSI + "0J",
+            CLEAR_UP = CSI + "1J",
+            CLEAR = CSI + "2J",
+            CLEAR_BUFFER = CSI + "3J",
+            RESET_CURSOR = CSI + "H",
+            CLEAR_LINE = CSI + "2K",
+            MOVE_UP = CSI + 'A',
+            MOVE_DOWN = CSI + 'B',
+            MOVE_RIGHT = CSI + 'C',
+            MOVE_LEFT = CSI + 'D',
+            MOVE_LINEUP = CSI + 'E',
+            MOVE_LINEDOWN = CSI + 'F',
+            BOLD = CSI + "1m",
+            FAINT = CSI + "2m",
+            ITALIC = CSI + "3m",
+            UNDERLINE = CSI + "4m",
+            BLINK_SLOW = CSI + "5m",
+            BLINK_FAST = CSI + "6m",
+            SWAP_COLORS = CSI + "7m",
+            CONCEAL = CSI + "8m",
+            DEFAULT_FONT = CSI + "10m",
+            FRAKTUR = CSI + "20m",
+            UNDERLINE_DOUBLE = CSI + "21m",
+            NORMAL = CSI + "22m",
+            ITALIC_OFF = CSI + "23m",
+            UNDERLINE_OFF = CSI + "24m",
+            BLINK_OFF = CSI + "25m",
+            INVERSE_OFF = CSI + "26m",
+            CONCEAL_OFF = CSI + "28m",
+            DEFAULT_FOREGROUND = CSI + "39m",
+            DEFAULT_BACKGROUND = CSI + "49m",
+            FRAMED = CSI + "51m",
+            ENCIRCLED = CSI + "52m",
+            OVERLINED = CSI + "53m",
+            FRAMED_OFF = CSI + "54m",
+            OVERLINED_OFF = CSI + "55m",
+            CURSOR_HIDE = CSI + "?25h",
+            CURSOR_SHOW = CSI + "?25l",
+            CURSOR_POS_SAVE = CSI + 's',
+            CURSOR_POS_RESTORE = CSI + 'u',
+            ALTERNATIVE_SCREEN_BUFFER = CSI + "?1049h",
+            ALTERNATIVE_SCREEN_BUFFER_OFF = CSI + "?1049l",
+            RESET_TERMINAL = CSI + 'c';
 
     /**
      * Select an alternative font.
      *
      * @param n the font number to use. Between 0 and 9 where 0 is the default font.
-     *
      * @return the corresponding ansi escape code.
      */
     public static String alternativeFont(int n) {
@@ -73,7 +73,6 @@ public class Anscapes {
      * Select terminal getColorMode.
      *
      * @param mode the getColorMode number, in this interval : [0,7]U[13,19].
-     *
      * @return the corresponding ansi escape code.
      */
     public static String setMode(int mode) {
@@ -86,7 +85,6 @@ public class Anscapes {
 
     /**
      * @param mode the getColorMode number, in this interval : [0,7]U[13,19].
-     *
      * @return the corresponding ansi escape code.
      */
     public static String resetMode(int mode) {
@@ -101,7 +99,6 @@ public class Anscapes {
      * Move cursor up n cells.
      *
      * @param n the number of cells
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveUp(int n) {
@@ -113,7 +110,6 @@ public class Anscapes {
      * Move cursor down n cells.
      *
      * @param n the number of cells
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveDown(int n) {
@@ -125,7 +121,6 @@ public class Anscapes {
      * Move cursor right n cells.
      *
      * @param n the number of cells
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveRight(int n) {
@@ -137,7 +132,6 @@ public class Anscapes {
      * Move cursor left n cells.
      *
      * @param n the number of cells
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveLeft(int n) {
@@ -149,7 +143,6 @@ public class Anscapes {
      * Move cursor n lines after.
      *
      * @param n the number of lines
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveNextLine(int n) {
@@ -161,7 +154,6 @@ public class Anscapes {
      * Move cursor n lines before.
      *
      * @param n the number of lines
-     *
      * @return the corresponding ansi escape code.
      */
     public static String movePreviousLine(int n) {
@@ -173,7 +165,6 @@ public class Anscapes {
      * Move cursor to the specified cell.
      *
      * @param n the cell number
-     *
      * @return the corresponding ansi escape code.
      */
     public static String moveHorizontal(int n) {
@@ -189,7 +180,6 @@ public class Anscapes {
      *
      * @param row the row number
      * @param col the column number
-     *
      * @return the corresponding ansi escape code.
      */
     public static String cursorPos(int row, int col) {
@@ -211,8 +201,7 @@ public class Anscapes {
 
         System.out.print(CSI + "6n");
         try {
-            System.in.read();
-            System.in.read();
+            System.in.skip(2);
             int read = -1;
             StringBuilder row = new StringBuilder();
             while ((read = System.in.read()) != ';') {
@@ -223,7 +212,7 @@ public class Anscapes {
                 col.append((char) read);
             }
             return new CursorPos(row.length() > 0 ? Integer.parseInt(row.toString()) : 1,
-                                 col.length() > 0 ? Integer.parseInt(col.toString()) : 1);
+                    col.length() > 0 ? Integer.parseInt(col.toString()) : 1);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -236,7 +225,6 @@ public class Anscapes {
      * @param r the red component
      * @param g the green component
      * @param b the blue component
-     *
      * @return the corresponding ansi escape code
      */
     public static AnsiColor rgb(int r, int g, int b) {
@@ -299,7 +287,6 @@ public class Anscapes {
     /**
      * @param c         the color to convert
      * @param threshold distance to evaluate a spot-on
-     *
      * @return the nearest ansi color
      */
     public static Colors findNearestColor(Color c, int threshold) {
@@ -312,8 +299,8 @@ public class Anscapes {
         for (Colors ansic : Colors.values()) {
 
             float dist = (float) Math.sqrt(Math.pow(ansic.color().getRed() - c.getRed(), 2) +
-                                           Math.pow(ansic.color().getGreen() - c.getGreen(), 2) +
-                                           Math.pow(ansic.color().getBlue() - c.getBlue(), 2));
+                                                   Math.pow(ansic.color().getGreen() - c.getGreen(), 2) +
+                                                   Math.pow(ansic.color().getBlue() - c.getBlue(), 2));
 
             // Speedup, if low distance its a spot-on
             if (dist < threshold) {

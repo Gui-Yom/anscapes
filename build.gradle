@@ -1,9 +1,11 @@
 plugins {
     id 'java-library'
+	id 'maven-publish'
 }
 
-group 'com.limelion'
-version '0.7.1'
+ext.moduleName = "com.github.LimeiloN.anscapes"
+group 'com.github.LimeiloN'
+version '0.8.0'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -15,12 +17,18 @@ repositories {
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.4.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.4.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.2"
 }
 
 test {
     useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes "Automatic-Module-Name": moduleName
+    }
 }
 
 tasks.withType(JavaCompile) {

@@ -7,9 +7,18 @@ import java.awt.Color;
  */
 public interface AnsiColor {
 
+    /**
+     * @return the associated java.awt.Color
+     */
     Color color();
 
+    /**
+     * @return the foreground version of this color
+     */
     String fg();
 
+    /**
+     * @return the background version of this color
+     */
     String bg();
 }
