@@ -1,11 +1,11 @@
-package com.limelion.anscapes;
+package tech.guiyom.anscapes;
 
 public class TerminalImage {
 
-    private String sequence;
-    private int width;
-    private int height;
-    private ColorMode colorMode;
+    private final String sequence;
+    private final int width;
+    private final int height;
+    private final ColorMode colorMode;
 
     public TerminalImage(String sequence, int width, int height, ColorMode colorMode) {
         this.sequence = sequence;

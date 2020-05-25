@@ -1,14 +1,16 @@
 plugins {
     id 'java-library'
-	id 'maven-publish'
+    id 'application'
+    id 'maven-publish'
 }
 
-ext.moduleName = "com.github.LimeiloN.anscapes"
-group 'com.github.LimeiloN'
-version '0.8.1'
+ext.moduleName = "tech.guiyom.anscapes"
+group 'com.github.Gui-Yom'
+version '0.9.0'
+mainClassName = "tech.guiyom.anscapes.Main"
 
-sourceCompatibility = 1.8
-targetCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 
 java {
     withJavadocJar()
@@ -22,23 +24,23 @@ publishing {
             pom {
                 name = 'anscapes'
                 description = 'Color codes and images for your terminal'
-                url = 'https://github.com/LimeiloN/anscapes'
+                url = 'https://github.com/Gui-Yom/anscapes'
                 licenses {
                     license {
                         name = 'MIT License'
-                        url = 'https://github.com/LimeiloN/anscapes/blob/master/LICENSE'
+                        url = 'https://github.com/Gui-Yom/anscapes/blob/master/LICENSE'
                     }
                 }
                 developers {
                     developer {
-                        id = 'LimeiloN'
+                        id = 'Gui-Yom'
                         name = 'Guillaume Anthouard'
                     }
                 }
                 scm {
-                    connection = 'scm:git:git://github.com/LimeiloN/anscapes.git'
-                    developerConnection = 'scm:git:ssh://github.com/LimeiloN/anscapes.git'
-                    url = 'https://github.com/LimeiloN/anscapes/'
+                    connection = 'scm:git:git://github.com/Gui-Yom/anscapes.git'
+                    developerConnection = 'scm:git:ssh://github.com/Gui-Yom/anscapes.git'
+                    url = 'https://github.com/Gui-Yom/anscapes/'
                 }
             }
         }
@@ -47,13 +49,13 @@ publishing {
 
 repositories {
     mavenLocal()
-    jcenter()
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
-    testImplementation "org.junit.jupiter:junit-jupiter-api:5.5.2"
-    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.5.2"
+    testImplementation "org.junit.jupiter:junit-jupiter-api:5.6.2"
+    testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:5.6.2"
 }
 
 test {
@@ -63,6 +65,7 @@ test {
 jar {
     manifest {
         attributes "Automatic-Module-Name": moduleName
+        attributes "Main-Class": mainClassName
     }
 }
 
