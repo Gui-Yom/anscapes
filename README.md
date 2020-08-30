@@ -12,7 +12,7 @@ repositories {
 }
 
 dependencies {
-    implementation "com.github.LimeiloN:anscapes:0.8.0"
+    implementation "com.github.Gui-Yom:anscapes:0.10.0"
 }
 ```
 

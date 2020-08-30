@@ -233,7 +233,7 @@ public class AnsiRenderer {
             // Save space if last code equals current code
             // TODO use a treshold to save even more space
             if (currentCell.colorsEquals(lastCell))
-                currentCell.getClear().writeTo();
+                currentCell.getCharCell().writeTo();
             else
                 currentCell.writeTo();
 
@@ -276,7 +276,6 @@ public class AnsiRenderer {
         }
 
         public void writeTo() {
-            char[] temp = null;
             if (fgColor != null) {
                 buffer.put(fgColor.fg());
             }
@@ -299,7 +298,7 @@ public class AnsiRenderer {
             return false;
         }
 
-        public Cell getClear() {
+        public Cell getCharCell() {
             return new Cell(null, null, character);
         }
     }
