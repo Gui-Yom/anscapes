@@ -241,7 +241,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code
      */
     public static AnsiColor rgb(int r, int g, int b) {
-
         return new AnsiColor() {
 
             @Override
@@ -268,6 +267,16 @@ public class Anscapes {
                 return false;
             }
         };
+    }
+
+    /**
+     * Create a new AnsiColor from its rgb code, only for terminals supporting 24bit color.
+     *
+     * @param color the AWT Color
+     * @return the corresponding ansi escape code
+     */
+    public static AnsiColor rgb(Color color) {
+        return rgb(color.getRed(), color.getGreen(), color.getBlue());
     }
 
     public static AnsiColor from256code(int code) {

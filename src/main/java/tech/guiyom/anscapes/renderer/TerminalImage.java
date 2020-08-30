@@ -1,4 +1,6 @@
-package tech.guiyom.anscapes;
+package tech.guiyom.anscapes.renderer;
+
+import tech.guiyom.anscapes.ColorMode;
 
 public class TerminalImage {
 
