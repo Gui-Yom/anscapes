@@ -9,14 +9,14 @@ import java.util.function.BiConsumer;
 
 public class RgbImageRenderer extends AbstractImageRenderer {
 
-    private int bias = 16;
+    private final int bias;
 
-    protected RgbImageRenderer(int targetWidth, int targetHeight) {
-        super(ColorMode.RGB, targetWidth, targetHeight);
+    public RgbImageRenderer(int targetWidth, int targetHeight) {
+        this(targetWidth, targetHeight, 8);
     }
 
-    protected RgbImageRenderer(int targetWidth, int targetHeight, int bias) {
-        this(targetWidth, targetHeight);
+    public RgbImageRenderer(int targetWidth, int targetHeight, int bias) {
+        super(ColorMode.RGB, targetWidth, targetHeight);
         this.bias = bias;
     }
 
@@ -49,9 +49,9 @@ public class RgbImageRenderer extends AbstractImageRenderer {
                     if (!lower.equals(prevLower))
                         buffer.put(lower.bg());
                 } else {
-                    if (!colorsEqualsBias(upper, prevUpper))
+                    if (colorsDiff(upper, prevUpper))
                         buffer.put(upper.fg());
-                    if (!colorsEqualsBias(lower, prevLower))
+                    if (colorsDiff(lower, prevLower))
                         buffer.put(lower.bg());
                 }
 
@@ -68,9 +68,31 @@ public class RgbImageRenderer extends AbstractImageRenderer {
         resultConsumer.accept(buffer.array(), buffer.position());
     }
 
-    private boolean colorsEqualsBias(AnsiColor c1, AnsiColor c2) {
+    /**
+     * Check if colors are different enough based on bias.
+     *
+     * @param c1 the first color
+     * @param c2 the second color
+     * @return if the colors are different enough
+     */
+    private boolean colorsDiff(AnsiColor c1, AnsiColor c2) {
         if (c2 == null)
             return false;
-        return (c1.color().getRed() - c2.color().getRed() + c1.color().getGreen() - c2.color().getGreen() + c1.color().getBlue() - c2.color().getBlue()) / 3 <= bias;
+        return (c1.color().getRed() - c2.color().getRed() + c1.color().getGreen() - c2.color().getGreen() + c1.color().getBlue() - c2.color().getBlue()) / 3 > bias;
+    }
+
+    /**
+     * Check if colors are different enough based on bias.
+     *
+     * @param c1 the first color
+     * @param c2 the second color
+     * @return if the colors are different enough
+     */
+    private boolean colorsDiff2(AnsiColor c1, AnsiColor c2) {
+        if (c2 == null)
+            return false;
+        return Math.sqrt(Math.pow(c1.color().getRed() - c2.color().getRed(), 2) +
+                                 Math.pow(c1.color().getGreen() - c2.color().getGreen(), 2) +
+                                 Math.pow(c1.color().getBlue() - c2.color().getBlue(), 2)) > bias;
     }
 }

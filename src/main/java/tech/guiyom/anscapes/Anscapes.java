@@ -115,7 +115,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String moveUp(int n) {
-
         return CSI + n + "A";
     }
 
@@ -126,7 +125,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String moveDown(int n) {
-
         return CSI + n + "B";
     }
 
@@ -137,7 +135,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String moveRight(int n) {
-
         return CSI + n + "C";
     }
 
@@ -148,7 +145,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String moveLeft(int n) {
-
         return CSI + n + "D";
     }
 
@@ -159,7 +155,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String moveNextLine(int n) {
-
         return CSI + n + "E";
     }
 
@@ -170,7 +165,6 @@ public class Anscapes {
      * @return the corresponding ansi escape code.
      */
     public static String movePreviousLine(int n) {
-
         return CSI + n + "F";
     }
 
@@ -240,12 +234,29 @@ public class Anscapes {
      * @param b the blue component
      * @return the corresponding ansi escape code
      */
-    public static AnsiColor rgb(int r, int g, int b) {
+    public static AnsiColor rgb(final int r, final int g, final int b) {
         return new AnsiColor() {
+
+            private final Color c = new Color(r, g, b);
 
             @Override
             public Color color() {
-                return new Color(r, g, b);
+                return c;
+            }
+
+            @Override
+            public int r() {
+                return r;
+            }
+
+            @Override
+            public int g() {
+                return g;
+            }
+
+            @Override
+            public int b() {
+                return b;
             }
 
             @Override
@@ -270,7 +281,7 @@ public class Anscapes {
     }
 
     /**
-     * Create a new AnsiColor from its rgb code, only for terminals supporting 24bit color.
+     * Create a new AnsiColor from an AWT Color, will only work for terminals supporting 24bit color.
      *
      * @param color the AWT Color
      * @return the corresponding ansi escape code
@@ -280,11 +291,25 @@ public class Anscapes {
     }
 
     public static AnsiColor from256code(int code) {
-
         return new AnsiColor() {
             @Override
             public Color color() {
                 return null;
+            }
+
+            @Override
+            public int r() {
+                return 0;
+            }
+
+            @Override
+            public int g() {
+                return 0;
+            }
+
+            @Override
+            public int b() {
+                return 0;
             }
 
             @Override
@@ -357,26 +382,37 @@ public class Anscapes {
         private final Color c;
 
         Colors(int value, Color c) {
-
             this.value = value;
             this.c = c;
         }
 
         @Override
         public Color color() {
-
             return c;
         }
 
         @Override
-        public String fg() {
+        public int r() {
+            return c.getRed();
+        }
 
+        @Override
+        public int g() {
+            return c.getGreen();
+        }
+
+        @Override
+        public int b() {
+            return c.getBlue();
+        }
+
+        @Override
+        public String fg() {
             return Anscapes.CSI + value + 'm';
         }
 
         @Override
         public String bg() {
-
             return Anscapes.CSI + (value + 10) + 'm';
         }
     }
@@ -387,24 +423,20 @@ public class Anscapes {
         private final int col;
 
         public CursorPos(int row, int col) {
-
             this.row = row;
             this.col = col;
         }
 
         public int row() {
-
             return row;
         }
 
         public int col() {
-
             return col;
         }
 
         @Override
         public boolean equals(Object obj) {
-
             if (obj instanceof CursorPos) {
                 CursorPos other = (CursorPos) obj;
                 return row == other.row && col == other.col;

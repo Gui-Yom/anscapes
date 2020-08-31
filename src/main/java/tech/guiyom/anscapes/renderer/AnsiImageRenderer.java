@@ -8,20 +8,29 @@ import java.awt.Color;
 import java.util.function.BiConsumer;
 
 /**
- * This class permits conversion from image to ansi sequences, effectively allowing to draw images on the terminal.
+ * Allow conversion of image to an ansi escape sequence of 16 basic colors.
  * <p>
  * You should use one instance per image / image sequence.
  */
 public class AnsiImageRenderer extends AbstractImageRenderer {
 
-    private static final int ditherThreshold = 5;
+    private final int threshold;
 
     /**
      * @param targetWidth  the target width for image rescaling
      * @param targetHeight the target height for image rescaling
      */
     public AnsiImageRenderer(int targetWidth, int targetHeight) {
+        this(targetWidth, targetHeight, 8);
+    }
+
+    /**
+     * @param targetWidth  the target width for image rescaling
+     * @param targetHeight the target height for image rescaling
+     */
+    public AnsiImageRenderer(int targetWidth, int targetHeight, int threshold) {
         super(ColorMode.ANSI, targetWidth, targetHeight);
+        this.threshold = threshold;
     }
 
     @Override
@@ -39,10 +48,10 @@ public class AnsiImageRenderer extends AbstractImageRenderer {
 
             int y = i * 2;
             for (int x = 0; x < targetWidth; ++x) {
-                AnsiColor upper = Anscapes.findNearestColor(new Color(data[y * targetHeight + x]), ditherThreshold);
+                AnsiColor upper = Anscapes.findNearestColor(new Color(data[y * targetHeight + x]), threshold);
                 AnsiColor lower = null;
                 if (y + 1 < targetHeight) {
-                    lower = Anscapes.findNearestColor(new Color(data[y * targetHeight + targetHeight + x]), ditherThreshold);
+                    lower = Anscapes.findNearestColor(new Color(data[y * targetHeight + targetHeight + x]), threshold);
                 } else {
                     lower = Anscapes.Colors.BLACK;
                 }
