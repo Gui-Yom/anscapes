@@ -9,7 +9,7 @@ public class TerminalImage {
     private final int height;
     private final ColorMode colorMode;
 
-    public TerminalImage(String sequence, int width, int height, ColorMode colorMode) {
+    TerminalImage(String sequence, int width, int height, ColorMode colorMode) {
         this.sequence = sequence;
         this.width = width;
         this.height = height;

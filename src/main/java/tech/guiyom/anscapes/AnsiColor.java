@@ -38,4 +38,14 @@ public interface AnsiColor {
      * @return the background version of this color
      */
     String bg();
+
+    /**
+     * Check if colors are different enough based on bias.
+     *
+     * @param c2 the other color
+     * @return if the colors are different enough
+     */
+    default boolean diffBiased(AnsiColor c2, int bias) {
+        return Anscapes.diffBiased(this, c2, bias);
+    }
 }

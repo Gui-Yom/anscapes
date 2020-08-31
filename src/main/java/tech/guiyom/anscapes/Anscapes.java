@@ -8,7 +8,7 @@ import java.util.regex.Matcher;
  * Contains about everything you need to manipulate the terminal using ansi escape codes.
  * Note that terminal won't render them unless you use things like jansi.
  */
-public class Anscapes {
+public final class Anscapes {
 
     public static final String CSI = "\33[",
             RESET = CSI + 'm',
@@ -235,59 +235,21 @@ public class Anscapes {
      * @return the corresponding ansi escape code
      */
     public static AnsiColor rgb(final int r, final int g, final int b) {
-        return new AnsiColor() {
-
-            private final Color c = new Color(r, g, b);
-
-            @Override
-            public Color color() {
-                return c;
-            }
-
-            @Override
-            public int r() {
-                return r;
-            }
-
-            @Override
-            public int g() {
-                return g;
-            }
-
-            @Override
-            public int b() {
-                return b;
-            }
-
-            @Override
-            public String fg() {
-                return Anscapes.CSI + "38;2;" + r + ';' + g + ';' + b + 'm';
-            }
-
-            @Override
-            public String bg() {
-                return Anscapes.CSI + "48;2;" + r + ';' + g + ';' + b + 'm';
-            }
-
-            @Override
-            public boolean equals(Object obj) {
-                if (obj instanceof AnsiColor) {
-                    AnsiColor other = (AnsiColor) obj;
-                    return color().equals(other.color());
-                }
-                return false;
-            }
-        };
+        return new RgbColor(r, g, b);
     }
 
     /**
      * Create a new AnsiColor from an AWT Color, will only work for terminals supporting 24bit color.
      *
-     * @param color the AWT Color
+     * @param c the AWT Color
      * @return the corresponding ansi escape code
      */
-    public static AnsiColor rgb(Color color) {
-        return rgb(color.getRed(), color.getGreen(), color.getBlue());
+    public static AnsiColor rgb(Color c) {
+        return new RgbColor(c);
+    }
+
+    public static AnsiColor rgb(int rgb) {
+        return new RgbColor(rgb);
     }
 
     public static AnsiColor from256code(int code) {
@@ -353,6 +315,12 @@ public class Anscapes {
             }
         }
         return closest;
+    }
+
+    static boolean diffBiased(AnsiColor c1, AnsiColor c2, int bias) {
+        if (c1 == null || c2 == null)
+            return true;
+        return Math.sqrt(Math.pow(c1.r() - c2.r(), 2) + Math.pow(c1.g() - c2.g(), 2) + Math.pow(c1.b() - c2.b(), 2)) > bias;
     }
 
     /**

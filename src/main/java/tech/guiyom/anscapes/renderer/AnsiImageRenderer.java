@@ -48,10 +48,10 @@ public class AnsiImageRenderer extends AbstractImageRenderer {
 
             int y = i * 2;
             for (int x = 0; x < targetWidth; ++x) {
-                AnsiColor upper = Anscapes.findNearestColor(new Color(data[y * targetHeight + x]), threshold);
+                AnsiColor upper = Anscapes.findNearestColor(new Color(data[y * targetHeight + x], true), threshold);
                 AnsiColor lower = null;
                 if (y + 1 < targetHeight) {
-                    lower = Anscapes.findNearestColor(new Color(data[y * targetHeight + targetHeight + x]), threshold);
+                    lower = Anscapes.findNearestColor(new Color(data[y * targetHeight + targetHeight + x], true), threshold);
                 } else {
                     lower = Anscapes.Colors.BLACK;
                 }
