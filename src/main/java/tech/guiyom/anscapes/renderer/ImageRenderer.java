@@ -8,6 +8,14 @@ import java.util.function.BiConsumer;
 
 public interface ImageRenderer {
 
+    /**
+     * Create a renderer for the desired {@link ColorMode} with default parameters.
+     *
+     * @param cmode        the desired {@link ColorMode}
+     * @param targetWidth  the rendered image width
+     * @param targetHeight the rendered image height
+     * @return the image renderer
+     */
     static ImageRenderer createRenderer(ColorMode cmode, int targetWidth, int targetHeight) {
         if (cmode == ColorMode.ANSI) {
             return new AnsiImageRenderer(targetWidth, targetHeight);
@@ -18,6 +26,9 @@ public interface ImageRenderer {
         }
     }
 
+    /**
+     * @return the {@link ColorMode} used by the rendered images.
+     */
     ColorMode getColorMode();
 
     void render(int[] data, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer);

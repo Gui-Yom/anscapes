@@ -11,10 +11,24 @@ public class RgbImageRenderer extends AbstractImageRenderer {
 
     private final int bias;
 
+    /**
+     * Create a new ImageRenderer that render images with 24bit colors.
+     * Default to a bias of 0.
+     *
+     * @param targetWidth
+     * @param targetHeight
+     */
     public RgbImageRenderer(int targetWidth, int targetHeight) {
-        this(targetWidth, targetHeight, 8);
+        this(targetWidth, targetHeight, 0);
     }
 
+    /**
+     * Create a new ImageRenderer that render images with 24bit colors.
+     *
+     * @param targetWidth
+     * @param targetHeight
+     * @param bias
+     */
     public RgbImageRenderer(int targetWidth, int targetHeight, int bias) {
         super(ColorMode.RGB, targetWidth, targetHeight);
         this.bias = bias;
@@ -49,9 +63,9 @@ public class RgbImageRenderer extends AbstractImageRenderer {
                     if (!lower.equals(prevLower))
                         buffer.put(lower.bg());
                 } else {
-                    if (colorsDiff(upper, prevUpper))
+                    if (colorsDiff2(upper, prevUpper))
                         buffer.put(upper.fg());
-                    if (colorsDiff(lower, prevLower))
+                    if (colorsDiff2(lower, prevLower))
                         buffer.put(lower.bg());
                 }
 
@@ -63,6 +77,9 @@ public class RgbImageRenderer extends AbstractImageRenderer {
 
             buffer.put(Anscapes.RESET);
             buffer.put(System.lineSeparator());
+
+            prevUpper = null;
+            prevLower = null;
         }
 
         resultConsumer.accept(buffer.array(), buffer.position());
@@ -77,7 +94,7 @@ public class RgbImageRenderer extends AbstractImageRenderer {
      */
     private boolean colorsDiff(AnsiColor c1, AnsiColor c2) {
         if (c2 == null)
-            return false;
+            return true;
         return (c1.color().getRed() - c2.color().getRed() + c1.color().getGreen() - c2.color().getGreen() + c1.color().getBlue() - c2.color().getBlue()) / 3 > bias;
     }
 
@@ -90,7 +107,7 @@ public class RgbImageRenderer extends AbstractImageRenderer {
      */
     private boolean colorsDiff2(AnsiColor c1, AnsiColor c2) {
         if (c2 == null)
-            return false;
+            return true;
         return Math.sqrt(Math.pow(c1.color().getRed() - c2.color().getRed(), 2) +
                                  Math.pow(c1.color().getGreen() - c2.color().getGreen(), 2) +
                                  Math.pow(c1.color().getBlue() - c2.color().getBlue(), 2)) > bias;
