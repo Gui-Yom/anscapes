@@ -54,7 +54,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
         return data;
     }
 
-    public static int[] resize(int[] pixels, int originalWidth, int originalHeight, int targetWidth, int targetHeight) {
+    static int[] resize(int[] pixels, int originalWidth, int originalHeight, int targetWidth, int targetHeight) {
         int[] resized = new int[targetWidth * targetHeight];
         // EDIT: added +1 to account for an early rounding problem
         int x_ratio = ((originalWidth << 16) / targetWidth) + 1;
