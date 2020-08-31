@@ -3,8 +3,8 @@ package tech.guiyom.anscapes.renderer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import tech.guiyom.anscapes.ColorMode;
+import tech.guiyom.anscapes.Utils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -20,20 +20,20 @@ public class AnsiImageRendererTest {
     @Test
     public void testAnsiColors() throws IOException {
 
-        ImageRenderer converter = ImageRenderer.createRenderer(ColorMode.ANSI, 64, 64);
+        ImageRenderer converter = ImageRenderer.createRenderer(ColorMode.ANSI, 360, 360);
 
         FileOutputStream out = new FileOutputStream("temp/shield_ansi.txt");
-        String result = converter.renderString(ImageIO.read(getClass().getResourceAsStream("shield.png")));
+        String result = converter.renderString(Utils.getSampleImage());
         out.write(result.getBytes(StandardCharsets.UTF_8));
         out.close();
     }
 
     @Test
-    public void testAnsiVideo() throws IOException {
+    public void testAnsiVideo() {
 
-        ImageRenderer converter = ImageRenderer.createRenderer(ColorMode.ANSI, 384, 216);
+        ImageRenderer converter = ImageRenderer.createRenderer(ColorMode.ANSI, 360, 360);
 
-        BufferedImage img = ImageIO.read(getClass().getResourceAsStream("shield.png"));
+        BufferedImage img = Utils.getSampleImage();
         int[] data = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
 
         // Warmup (200 rounds)

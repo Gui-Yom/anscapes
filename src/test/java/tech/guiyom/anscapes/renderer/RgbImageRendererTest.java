@@ -3,8 +3,8 @@ package tech.guiyom.anscapes.renderer;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import tech.guiyom.anscapes.Utils;
 
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -21,21 +21,21 @@ public class RgbImageRendererTest {
     @ValueSource(ints = { 0, 2, 4, 8, 16, 32 })
     public void testRgbColors(final int bias) throws IOException {
 
-        ImageRenderer converter = new RgbImageRenderer(64, 64, bias);
+        ImageRenderer converter = new RgbImageRenderer(360, 360, bias);
 
         FileOutputStream out = new FileOutputStream("temp/shield_rgb_" + bias + ".txt");
-        String result = converter.renderString(ImageIO.read(getClass().getResourceAsStream("shield.png")));
+        String result = converter.renderString(Utils.getSampleImage());
         out.write(result.getBytes(StandardCharsets.UTF_8));
         out.close();
     }
 
     @ParameterizedTest
     @ValueSource(ints = { 0, 2, 4, 8, 16, 32 })
-    public void testRgbVideo(final int bias) throws IOException {
+    public void testRgbVideo(final int bias) {
 
         ImageRenderer converter = new RgbImageRenderer(360, 360, bias);
 
-        BufferedImage img = ImageIO.read(getClass().getResourceAsStream("shield.png"));
+        BufferedImage img = Utils.getSampleImage();
         int[] data = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
 
         // Warmup (200 rounds)
