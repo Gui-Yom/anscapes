@@ -5,6 +5,7 @@ import tech.guiyom.anscapes.ColorMode;
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
+import java.nio.IntBuffer;
 import java.util.function.BiConsumer;
 
 public abstract class AbstractImageRenderer implements ImageRenderer {
@@ -20,18 +21,20 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
     // Target size
     protected final int targetWidth;
     protected final int targetHeight;
-    protected final CharBuffer buffer;
+    protected final CharBuffer outputBuffer;
     // Color mode
     protected ColorMode colorMode;
+    protected int[] resizeBuffer;
 
     protected AbstractImageRenderer(ColorMode cmode, int targetWidth, int targetHeight) {
         this.colorMode = cmode;
         this.targetWidth = targetWidth;
         this.targetHeight = targetHeight;
+        this.resizeBuffer = new int[targetWidth * targetHeight];
 
         // Scaling the buffer for the worst case to prevent further array copies.
-        this.buffer = CharBuffer.allocate(39 * targetHeight * targetWidth + targetHeight * 5);
-        this.buffer.mark();
+        this.outputBuffer = CharBuffer.allocate(39 * targetHeight * targetWidth + targetHeight * 5);
+        this.outputBuffer.mark();
     }
 
     protected static int[] bytesToARGB(ByteBuffer buf, int width, int height) {
@@ -54,8 +57,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
         return data;
     }
 
-    static int[] resize(int[] pixels, int originalWidth, int originalHeight, int targetWidth, int targetHeight) {
-        int[] resized = new int[targetWidth * targetHeight];
+    static void resize(int[] pixels, int originalWidth, int originalHeight, int[] out, int targetWidth, int targetHeight) {
         // EDIT: added +1 to account for an early rounding problem
         int x_ratio = ((originalWidth << 16) / targetWidth) + 1;
         int y_ratio = ((originalHeight << 16) / targetHeight) + 1;
@@ -66,10 +68,9 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
             for (int j = 0; j < targetWidth; j++) {
                 x2 = ((j * x_ratio) >> 16);
                 y2 = ((i * y_ratio) >> 16);
-                resized[(i * targetWidth) + j] = pixels[(y2 * originalWidth) + x2];
+                out[(i * targetWidth) + j] = pixels[(y2 * originalWidth) + x2];
             }
         }
-        return resized;
     }
 
     public int getTargetWidth() {
@@ -80,6 +81,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
         return targetHeight;
     }
 
+    @Override
     public ColorMode getColorMode() {
         return colorMode;
     }
@@ -90,14 +92,19 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
      * @param pixels         the pixel data
      * @param originalWidth  the original pixel array width
      * @param originalHeight the original pixel array height
-     * @return the resized pixel data
      */
-    protected int[] resize(int[] pixels, int originalWidth, int originalHeight) {
-        return resize(pixels, originalWidth, originalHeight, targetWidth, targetHeight);
+    protected void resize(int[] pixels, int originalWidth, int originalHeight) {
+        resize(pixels, originalWidth, originalHeight, resizeBuffer, targetWidth, targetHeight);
     }
 
+    @Override
     public void render(ByteBuffer buf, int originalWidth, int originalHeight, BiConsumer<char[], Integer> renderConsumer) {
-        render(bytesToARGB(buf, originalWidth, originalHeight), originalWidth, originalHeight, renderConsumer);
+        render(buf.asIntBuffer(), originalWidth, originalHeight, renderConsumer);
+    }
+
+    @Override
+    public void render(IntBuffer buf, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer) {
+        render(buf.array(), originalWidth, originalHeight, resultConsumer);
     }
 
     /**
@@ -106,6 +113,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
      * @param image the image to convert
      * @return a sequence of ansi codes in the form of a String
      */
+    @Override
     public TerminalImage render(BufferedImage image) {
         return new TerminalImage(renderString(image), targetWidth, targetHeight, colorMode);
     }
@@ -118,6 +126,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
      * @param originalHeight the pixel array height
      * @return the created TerminalImage instance
      */
+    @Override
     public TerminalImage render(int[] data, int originalWidth, int originalHeight) {
         return new TerminalImage(renderString(data, originalWidth, originalHeight), targetWidth, targetHeight, colorMode);
     }
@@ -128,6 +137,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
      * @param image the image to convert
      * @return the ansi sequence
      */
+    @Override
     public String renderString(BufferedImage image) {
         int[] data = image.getRGB(0, 0, image.getWidth(), image.getHeight(), null, 0, image.getWidth());
         return renderString(data, image.getWidth(), image.getHeight());
@@ -141,6 +151,7 @@ public abstract class AbstractImageRenderer implements ImageRenderer {
      * @param originalHeight the pixel array height
      * @return the ansi sequence
      */
+    @Override
     public String renderString(int[] data, int originalWidth, int originalHeight) {
         String[] result = new String[1];
         render(data, originalWidth, originalHeight, (buf, len) -> result[0] = new String(buf, 0, len));

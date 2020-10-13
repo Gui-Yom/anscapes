@@ -4,6 +4,7 @@ import tech.guiyom.anscapes.ColorMode;
 
 import java.awt.image.BufferedImage;
 import java.nio.ByteBuffer;
+import java.nio.IntBuffer;
 import java.util.function.BiConsumer;
 
 public interface ImageRenderer {
@@ -34,6 +35,8 @@ public interface ImageRenderer {
     void render(int[] data, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer);
 
     void render(ByteBuffer buf, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer);
+
+    void render(IntBuffer buf, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer);
 
     String renderString(int[] data, int originalWidth, int originalHeight);
 

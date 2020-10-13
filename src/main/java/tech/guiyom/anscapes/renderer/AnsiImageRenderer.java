@@ -37,10 +37,12 @@ public class AnsiImageRenderer extends AbstractImageRenderer {
     public void render(int[] data, int originalWidth, int originalHeight, BiConsumer<char[], Integer> resultConsumer) {
 
         // Resize if needed
-        if (originalWidth != targetWidth || originalHeight != targetHeight)
-            data = resize(data, originalWidth, originalHeight);
+        if (originalWidth != targetWidth || originalHeight != targetHeight) {
+            resize(data, originalWidth, originalHeight);
+            data = resizeBuffer;
+        }
 
-        this.buffer.reset();
+        this.outputBuffer.reset();
         AnsiColor prevUpper = null;
         AnsiColor prevLower = null;
 
@@ -57,20 +59,20 @@ public class AnsiImageRenderer extends AbstractImageRenderer {
                 }
 
                 if (!upper.equals(prevUpper))
-                    buffer.put(upper.fg());
+                    outputBuffer.put(upper.fg());
                 if (!lower.equals(prevLower))
-                    buffer.put(lower.bg());
+                    outputBuffer.put(lower.bg());
 
-                buffer.put(CHAR_TOP);
+                outputBuffer.put(CHAR_TOP);
 
                 prevUpper = upper;
                 prevLower = lower;
             }
 
-            buffer.put(Anscapes.RESET);
-            buffer.put(System.lineSeparator());
+            outputBuffer.put(Anscapes.RESET);
+            outputBuffer.put(System.lineSeparator());
         }
 
-        resultConsumer.accept(buffer.array(), buffer.position());
+        resultConsumer.accept(outputBuffer.array(), outputBuffer.position());
     }
 }

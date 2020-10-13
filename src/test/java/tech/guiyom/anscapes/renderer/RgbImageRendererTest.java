@@ -33,7 +33,9 @@ public class RgbImageRendererTest {
     @ValueSource(ints = { 0, 2, 4, 8, 16, 32 })
     public void testRgbVideo(final int bias) {
 
-        ImageRenderer converter = new RgbImageRenderer(360, 360, bias);
+        final int targetWidth = 360;
+        final int targetHeight = 360;
+        ImageRenderer converter = new RgbImageRenderer(targetWidth, targetHeight, bias);
 
         BufferedImage img = Utils.getSampleImage();
         int[] data = img.getRGB(0, 0, img.getWidth(), img.getHeight(), null, 0, img.getWidth());
@@ -49,9 +51,11 @@ public class RgbImageRendererTest {
             converter.render(data, img.getWidth(), img.getHeight(), (buf, len) -> buf[0] = 'a');
         long totalTime = System.nanoTime() - startTime;
 
-        System.out.printf("RGB (bias=%d) | Total (ms) : %d | Per frame (ms) : %f%n",
+        System.out.printf("RGB (bias=%d) | Total (ms) : %d | Per frame (ms) : %f (%dx%d)%n",
                 bias,
                 totalTime / 1_000_000,
-                (double) totalTime / (numRun * 1_000_000));
+                (double) totalTime / (numRun * 1_000_000),
+                targetWidth,
+                targetHeight);
     }
 }
